@@ -1,0 +1,37 @@
+{
+  "name": "samlp",
+  "version": "0.1.0",
+  "description": "SAML Protocol server middleware",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auth0/node-samlp.git"
+  },
+  "keywords": [
+    "saml",
+    "auth"
+  ],
+  "author": "Auth0",
+  "license": "mit",
+  "dependencies": {
+    "saml": "~0.2.5",
+    "ejs": "~0.8.3",
+    "thumbprint": "0.0.1",
+    "xmldom": "~0.1.15",
+    "xpath": "0.0.5"
+  },
+  "devDependencies": {
+    "chai": "~1.5.0",
+    "express": "~3.1.0",
+    "mocha": "~1.8.1",
+    "request": "~2.14.0",
+    "xmldom": "~0.1.13",
+    "cheerio": "~0.10.7",
+    "xml-crypto": "0.0.10",
+    "xpath": "0.0.5",
+    "xtend": "~2.0.3"
+  }
+}
