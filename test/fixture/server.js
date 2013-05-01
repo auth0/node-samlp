@@ -54,6 +54,11 @@ module.exports.start = function(options, callback){
         key:                credentials.key
       }, options)));
 
+  app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({
+    issuer:   'urn:fixture-test',
+    cert:     credentials.cert
+  }));
+
   var server = http.createServer(app).listen(5050, callback);
   module.exports.close = server.close.bind(server);
 };

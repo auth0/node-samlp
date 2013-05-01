@@ -1,9 +1,5 @@
 <EntityDescriptor entityID="<%= issuer %>" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
-  <RoleDescriptor xsi:type="fed:SecurityTokenServiceType" 
-                  protocolSupportEnumeration="http://docs.oasis-open.org/wsfed/federation/200706" 
-                  ServiceDisplayName="<%= issuer %>" 
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                  xmlns:fed="http://docs.oasis-open.org/wsfed/federation/200706">
+  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <KeyDescriptor use="signing">
       <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
         <X509Data>
@@ -11,23 +7,13 @@
         </X509Data>
       </KeyInfo>
     </KeyDescriptor>
-    <fed:TokenTypesOffered>
-      <fed:TokenType Uri="urn:oasis:names:tc:SAML:2.0:assertion"/>
-      <fed:TokenType Uri="urn:oasis:names:tc:SAML:1.0:assertion"/>
-    </fed:TokenTypesOffered>
-    <fed:ClaimTypesOffered>
-      <% claimTypes.forEach(function(ct) {%>
-      <auth:ClaimType 
-          Uri="<%= ct.id %>" 
-          Optional="<%= !!ct.optional %>" 
-          xmlns:auth="http://docs.oasis-open.org/wsfed/authorization/200706">
-        <auth:DisplayName><%= ct.displayName %></auth:DisplayName>
-        <auth:Description><%= ct.description %></auth:Description>
-      </auth:ClaimType>
-      <% }); %>
-    </fed:ClaimTypesOffered>
-    <fed:PassiveRequestorEndpoint>
-      <EndpointReference xmlns="http://www.w3.org/2005/08/addressing"><Address><%= endpoint %></Address></EndpointReference>
-    </fed:PassiveRequestorEndpoint>
-  </RoleDescriptor>
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<%= endpoint %>"/>
+    <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+    <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
+    <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<%= endpoint %>"/>
+    <% claimTypes.forEach(function(ct) {%>
+    <Attribute Name="<%= ct.id %>" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" FriendlyName="<%= ct.displayName %>" xmlns="urn:oasis:names:tc:SAML:2.0:assertion"/>
+    <% }); %>
+  </IDPSSODescriptor>
 </EntityDescriptor>

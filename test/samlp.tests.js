@@ -4,7 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var xmlhelper = require('./xmlhelper');
 
-describe.only('samlp', function () {
+describe('samlp', function () {
   before(function (done) {
     server.start(done);
   });
@@ -25,7 +25,8 @@ describe.only('samlp', function () {
         body = b;
         $ = cheerio.load(body);
         var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(SAMLResponse)[1];
+        var decoded = new Buffer(SAMLResponse, 'base64').toString();
+        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
         attributes = xmlhelper.getAttributes(signedAssertion);
         done();
       });

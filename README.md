@@ -1,4 +1,4 @@
-SAML Protocol middleware for node.js.
+SAML Protocol middleware to create SAMLP identity providers for node.js.
 
 [![Build Status](https://travis-ci.org/auth0/node-samlp.png)](https://travis-ci.org/auth0/node-samlp)
 
@@ -8,7 +8,7 @@ SAML Protocol middleware for node.js.
 
 ## Introduction
 
-This middleware is meant to generate a valid SAML Protocol endpoint that talks saml.
+This middleware is meant to generate a valid SAML Protocol identity provider endpoint that speaks saml.
 
 The idea is that you will use another mechanism to validate the user first.
 

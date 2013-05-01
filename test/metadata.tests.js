@@ -11,7 +11,7 @@ function certToPem (cert) {
   return null;
 }
 
-describe('wsfed metadata', function () {
+describe('samlp metadata', function () {
   before(function (done) {
     server.start(done);
   });
@@ -25,7 +25,7 @@ describe('wsfed metadata', function () {
     before(function (done) {
       request.get({
         jar: request.jar(), 
-        uri: 'http://localhost:5050/wsfed/FederationMetadata/2007-06/FederationMetadata.xml'
+        uri: 'http://localhost:5050/samlp/FederationMetadata/2007-06/FederationMetadata.xml'
       }, function (err, response, b){
         if(err) return done(err);
         content = b;
@@ -35,18 +35,18 @@ describe('wsfed metadata', function () {
     });
 
     it('sholud have the endpoint url', function(){
-      expect(doc.getElementsByTagName('EndpointReference')[0].firstChild.textContent)
-        .to.equal('http://localhost:5050/wsfed');
+      expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Location'))
+        .to.equal('http://localhost:5050/samlp');
     });
 
     it('sholud have the claim types', function(){
-      expect(doc.getElementsByTagName('auth:ClaimType'))
+      expect(doc.getElementsByTagName('Attribute'))
         .to.not.be.empty;
     });
 
     it('sholud have the issuer', function(){
       expect(doc.getAttribute('entityID'))
-        .to.equal('fixture-test');
+        .to.equal('urn:fixture-test');
     });
 
     it('sholud have the pem', function(){
