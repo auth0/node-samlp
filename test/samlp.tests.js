@@ -106,7 +106,7 @@ describe('samlp', function () {
   describe('when using an invalid audience', function () {
     before(function () {
       server.options = { getPostURL: function getPostURL (audience, samlRequestDom, req, callback) {
-          // return a null post URL
+          // return a null post url
           callback(null, null);
         }
       };
