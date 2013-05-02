@@ -22,14 +22,14 @@ Options
 | --------------------|:-------------------------------------------------| ---------------------------------------------|
 | cert                | public key used by this identity provider        | REQUIRED                                     |
 | key                 | private key used by this identity provider       | REQUIRED                                     |
-| getPostURL          | get the url to post the token f(wtrealm, wreply, req, callback)                | REQUIRED                                     |
+| getPostURL          | get the url to post the token f(audience, samlRequestDom, req, callback)                | REQUIRED                                     |
 | issuer              | the name of the issuer of the token              | REQUIRED                                     |
-| audience            | the audience for the saml token                  | req.query.wtrealm || req.query.wreply        |
+| audience            | the audience for the saml token                  | req.query.SAMLRequest.Issuer                 |
 | getUserFromRequest  | how to extract the user information from request | function(req) { return req.user; }           |
 | profileMapper       | mapper to map users to claims (see PassportProfileMapper)| PassportProfileMapper |
 | signatureAlgorithm  | signature algorithm, options: rsa-sha1, rsa-sha256 | ```'rsa-sha256'``` |
 | digestAlgorithm     | digest algorithm, options: sha1, sha256          | ```'sha256'``` |
-| RelayState          | state of the auth process                        | ```req.query.RelayState``` |
+| RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
 
 
 Add the middleware as follows:
@@ -45,9 +45,9 @@ app.get('/samlp', samlp.auth({
 }));
 ~~~~
 
-## WsFederation Metadata
+## SAML Protocol Metadata
 
-wsfed can generate the metadata document for wsfederation as well. Usage as follows:
+This module also support generating SAML Protocol metadata (IDPSsoDescriptor):
 
 ~~~javascript
 app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', wsfed.metadata({
