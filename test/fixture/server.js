@@ -26,10 +26,13 @@ var credentials = {
   pkcs7:    fs.readFileSync(path.join(__dirname, 'samlp.test-cert.pb7'))
 };
 
+module.exports.options = {};
+
 module.exports.start = function(options, callback){
+  module.exports.options = options;
   if (typeof options === 'function') {
     callback = options;
-    options = {};
+    module.exports.options = {};
   }
 
   var app = express();
@@ -46,13 +49,14 @@ module.exports.start = function(options, callback){
   }
 
   //configure samlp middleware
-  app.get('/samlp', 
-      samlp.auth(xtend({}, {
+  app.get('/samlp', function(req, res, next) { 
+    samlp.auth(xtend({}, {
         issuer:             'urn:fixture-test',
         getPostURL:         getPostURL,
         cert:               credentials.cert,
         key:                credentials.key
-      }, options)));
+      }, module.exports.options))(req, res);
+  });
 
   app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({
     issuer:   'urn:fixture-test',

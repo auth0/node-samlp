@@ -2,19 +2,25 @@ var xmlCrypto = require('xml-crypto'),
     xmldom = require('xmldom');
     
 exports.verifySignature = function(assertion, cert) {
-  var doc = new xmldom.DOMParser().parseFromString(assertion);
-  var signature = xmlCrypto.xpath.SelectNodes(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")[0];
-  var sig = new xmlCrypto.SignedXml(null, { idAttribute: 'AssertionID' });
-  sig.keyInfoProvider = {
-    getKeyInfo: function (key) {
-      return "<X509Data></X509Data>";
-    },
-    getKey: function (keyInfo) {
-      return cert;
-    }
-  };
-  sig.loadSignature(signature.toString());
-  return sig.checkSignature(assertion);
+  try {
+    var doc = new xmldom.DOMParser().parseFromString(assertion);
+    var signature = xmlCrypto.xpath.SelectNodes(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")[0];
+    var sig = new xmlCrypto.SignedXml(null, { idAttribute: 'AssertionID' });
+    sig.keyInfoProvider = {
+      getKeyInfo: function (key) {
+        return "<X509Data></X509Data>";
+      },
+      getKey: function (keyInfo) {
+        return cert;
+      }
+    };
+    sig.loadSignature(signature.toString());
+    return sig.checkSignature(assertion);
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+
 };
 
 exports.getIssuer = function(assertion) {

@@ -6,14 +6,16 @@ var xmlhelper = require('./xmlhelper');
 
 describe('samlp', function () {
   before(function (done) {
-    server.start(done);
+    server.start( { 
+      audience: 'https://auth0-dev-ed.my.salesforce.com'
+    },done);
   });
   
   after(function (done) {
     server.close(done);
   });
 
-  describe('authorizing', function () {
+  describe('SAMLRequest on querystring', function () {
     var body, $, signedAssertion, attributes;
 
     before(function (done) {
@@ -22,6 +24,9 @@ describe('samlp', function () {
         uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
       }, function (err, response, b){
         if(err) return done(err);
+        expect(response.statusCode)
+          .to.equal(200);
+
         body = b;
         $ = cheerio.load(body);
         var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
@@ -78,6 +83,11 @@ describe('samlp', function () {
         .to.equal(server.fakeUser.id);
     });
 
+    it('should set nameidentifier format to urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified by default', function(){
+      expect(xmlhelper.getNameIdentifier(signedAssertion).getAttribute('Format'))
+        .to.equal('urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified');
+    });
+
     it('should contains the issuer', function(){
       expect(xmlhelper.getIssuer(signedAssertion))
         .to.equal('urn:fixture-test');
@@ -93,17 +103,54 @@ describe('samlp', function () {
     });
   });
 
-  // describe('when using an invalid callback url', function () {
-  //   it('should return error', function(done){
-  //     request.get({
-  //       jar: request.jar(), 
-  //       uri: 'http://localhost:5050/wsfed?wa=wsignin1.0&wctx=123&wtrealm=urn:auth0:superclient&wreply=http://google.comcomcom'
-  //     }, function (err, response){
-  //       if(err) return done(err);
-  //       expect(response.statusCode)
-  //         .to.equal(401);
-  //       done();
-  //     });
-  //   });
-  // });
+  describe('when using an invalid audience', function () {
+    before(function () {
+      server.options = { getPostURL: function getPostURL (audience, samlRequestDom, req, callback) {
+          // return a null post URL
+          callback(null, null);
+        }
+      };
+    });
+    
+    it('should return error', function(done){
+      request.get({
+        jar: request.jar(), 
+        uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
+      }, function (err, response){
+        if(err) return done(err);
+        expect(response.statusCode)
+          .to.equal(401);
+        done();
+      });
+    });
+  });
+
+describe('when using a different name identifier format', function () {
+    var body, $, signedAssertion, attributes;
+    
+    before(function (done) {
+      server.options = { nameIdentifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress' };
+      request.get({
+        jar: request.jar(), 
+        uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
+      }, function (err, response, b){
+        if(err) return done(err);
+        expect(response.statusCode)
+          .to.equal(200);
+
+        body = b;
+        $ = cheerio.load(body);
+        var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+        var decoded = new Buffer(SAMLResponse, 'base64').toString();
+        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
+        attributes = xmlhelper.getAttributes(signedAssertion);
+        done();
+      });
+    });
+    
+    it('should override nameidentifier format', function(){
+      expect(xmlhelper.getNameIdentifier(signedAssertion).getAttribute('Format'))
+        .to.equal('urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress');
+    });
+  });
 });
