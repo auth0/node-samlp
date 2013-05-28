@@ -1,6 +1,6 @@
 {
   "name": "samlp",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
@@ -17,12 +17,12 @@
   "author": "Auth0",
   "license": "mit",
   "dependencies": {
-    "saml": "~0.3.1",
+    "saml": "~0.4.0",
     "ejs": "~0.8.3",
     "thumbprint": "0.0.1",
     "xmldom": "~0.1.15",
     "xpath": "0.0.5",
-    "xml-crypto": "0.0.10"
+    "xml-crypto": "git://github.com/auth0/xml-crypto"
   },
   "devDependencies": {
     "chai": "~1.5.0",

@@ -2,6 +2,7 @@ var expect = require('chai').expect;
 var server = require('./fixture/server');
 var request = require('request');
 var cheerio = require('cheerio');
+var xmldom = require('xmldom');
 var xmlhelper = require('./xmlhelper');
 
 describe('samlp', function () {
@@ -50,6 +51,14 @@ describe('samlp', function () {
                 signedAssertion, 
                 server.credentials.cert);
       expect(isValid).to.be.ok;
+    });
+
+    it('should have signature after issuer', function(){
+      var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+    
+      var signature = doc.documentElement.getElementsByTagName('Signature');
+
+      expect('saml:Issuer', signature[0].previousSibling.nodeName);
     });
 
     it('should use sha256 as default signature algorithm', function(){
