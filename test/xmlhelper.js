@@ -29,6 +29,12 @@ exports.getIssuer = function(assertion) {
   return issuer[0].textContent;
 };
 
+exports.getDestination = function(response) {
+  var doc = new xmldom.DOMParser().parseFromString(response);
+  var destination = doc.documentElement.getAttribute('Destination');
+  return destination;
+};
+
 exports.getSignatureMethodAlgorithm = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement

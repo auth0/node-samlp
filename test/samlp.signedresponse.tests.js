@@ -8,6 +8,7 @@ describe('samlp signed response', function () {
   before(function (done) {
     server.start({ 
       audience: 'https://auth0-dev-ed.my.salesforce.com',
+      destination: 'http://destination',
       signResponse: true }, done);
   });
   
@@ -48,6 +49,11 @@ describe('samlp signed response', function () {
     it('should use sha256 as default diigest algorithm', function(){
       var algorithm = xmlhelper.getDigestMethodAlgorithm(signedResponse);
       expect(algorithm).to.equal('http://www.w3.org/2001/04/xmlenc#sha256');
+    });
+
+    it('should use destination if defined', function(){
+      var destination = xmlhelper.getDestination(signedResponse);
+      expect(destination).to.equal('http://destination');
     });
 
   });
