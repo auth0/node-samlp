@@ -164,7 +164,7 @@ describe('when using a different name identifier format', function () {
   });
 
  describe('when sending SAMLRequest ID ', function () {
-    var body, $, signedAssertion;
+    var body, $, signedAssertion, samlResponse;
     
     before(function (done) {
       // SAMLRequest = 
@@ -187,8 +187,8 @@ describe('when using a different name identifier format', function () {
         body = b;
         $ = cheerio.load(body);
         var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-        var decoded = new Buffer(SAMLResponse, 'base64').toString();
-        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
+        samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
         done();
       });
     });
@@ -196,6 +196,11 @@ describe('when using a different name identifier format', function () {
     it('should send back the ID as InResponseTo', function(){
       expect(xmlhelper.getSubjectConfirmationData(signedAssertion).getAttribute('InResponseTo'))
         .to.equal('12345');
+    });
+
+    it('should send back the ID as InResponseTo', function(){
+      var doc = new xmldom.DOMParser().parseFromString(samlResponse);
+      expect(doc.documentElement.getAttribute('InResponseTo')).to.equal('12345');
     });
   });
 
