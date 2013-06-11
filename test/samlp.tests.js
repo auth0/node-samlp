@@ -162,4 +162,42 @@ describe('when using a different name identifier format', function () {
         .to.equal('urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress');
     });
   });
+
+ describe('when sending SAMLRequest ID ', function () {
+    var body, $, signedAssertion;
+    
+    before(function (done) {
+      // SAMLRequest = 
+      // <?xml version="1.0" encoding="UTF-8"?>
+      // <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" 
+      //        Destination="https://destination" 
+      //        ID="12345" 
+      //        IssueInstant="2013-04-28T22:43:42.386Z" 
+      //        ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0">
+      //     <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer>
+      //  </samlp:AuthnRequest>
+      request.get({
+        jar: request.jar(), 
+        uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
+      }, function (err, response, b){
+        if(err) return done(err);
+        expect(response.statusCode)
+          .to.equal(200);
+
+        body = b;
+        $ = cheerio.load(body);
+        var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+        var decoded = new Buffer(SAMLResponse, 'base64').toString();
+        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
+        done();
+      });
+    });
+    
+    it('should send back the ID as InResponseTo', function(){
+      expect(xmlhelper.getSubjectConfirmationData(signedAssertion).getAttribute('InResponseTo'))
+        .to.equal('12345');
+    });
+  });
+
+
 });

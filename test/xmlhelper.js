@@ -78,3 +78,8 @@ exports.getNameIdentifier = function(assertion) {
   return doc.documentElement
             .getElementsByTagName('saml:NameID')[0];
 };
+
+exports.getSubjectConfirmationData = function(assertion) {
+  var doc = new xmldom.DOMParser().parseFromString(assertion);
+  return doc.documentElement.getElementsByTagName('saml:SubjectConfirmationData')[0];
+};
