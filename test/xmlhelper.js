@@ -83,3 +83,8 @@ exports.getSubjectConfirmationData = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement.getElementsByTagName('saml:SubjectConfirmationData')[0];
 };
+
+exports.getAuthnContextClassRef = function(assertion) {
+  var doc = new xmldom.DOMParser().parseFromString(assertion);
+  return doc.documentElement.getElementsByTagName('saml:AuthnContextClassRef')[0];
+};
