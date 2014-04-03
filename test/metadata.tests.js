@@ -34,9 +34,28 @@ describe('samlp metadata', function () {
       });
     });
 
-    it('sholud have the endpoint url', function(){
+    it('sholud have the redirect endpoint url', function(){
+      expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Binding'))
+        .to.equal('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect');
+
       expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Location'))
-        .to.equal('http://localhost:5050/samlp');
+        .to.equal('http://localhost:5050/samlp/123');
+    });
+
+    it('sholud have the POST endpoint url', function(){
+      expect(doc.getElementsByTagName('SingleSignOnService')[1].getAttribute('Binding'))
+        .to.equal('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
+
+      expect(doc.getElementsByTagName('SingleSignOnService')[1].getAttribute('Location'))
+        .to.equal('http://localhost:5050/login/callback');
+    });
+
+    it('sholud have the logout endpoint url', function(){
+      expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Binding'))
+        .to.equal('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect');
+        
+      expect(doc.getElementsByTagName('SingleLogoutService')[0].getAttribute('Location'))
+        .to.equal('http://localhost:5050/logout');
     });
 
     it('sholud have the claim types', function(){
