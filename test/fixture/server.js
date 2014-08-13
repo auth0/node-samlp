@@ -7,7 +7,7 @@ var path = require('path');
 
 var fakeUser = {
   id: '12345678',
-  displayName: 'John Foo',
+  displayName: 'John Flatabøáíéíáíðøßdœïvn',
   name: {
     familyName: 'Foo',
     givenName: 'John'
@@ -49,7 +49,7 @@ module.exports.start = function(options, callback){
   }
 
   //configure samlp middleware
-  app.get('/samlp', function(req, res, next) { 
+  app.get('/samlp', function(req, res, next) {
     samlp.auth(xtend({}, {
         issuer:             'urn:fixture-test',
         getPostURL:         getPostURL,

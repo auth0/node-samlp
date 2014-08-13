@@ -6,12 +6,12 @@ var xmlhelper = require('./xmlhelper');
 
 describe('samlp signed response', function () {
   before(function (done) {
-    server.start({ 
+    server.start({
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       destination: 'http://destination',
       signResponse: true }, done);
   });
-  
+
   after(function (done) {
     server.close(done);
   });
@@ -21,7 +21,7 @@ describe('samlp signed response', function () {
 
     before(function (done) {
       request.get({
-        jar: request.jar(), 
+        jar: request.jar(),
         uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
       }, function (err, response, b){
         if(err) return done(err);
@@ -34,9 +34,10 @@ describe('samlp signed response', function () {
       });
     });
 
-    it('should contain a valid signed response', function(){
+    it.only('should contain a valid signed response', function(){
+      console.log(signedResponse);
       var isValid = xmlhelper.verifySignature(
-                signedResponse, 
+                signedResponse,
                 server.credentials.cert);
       expect(isValid).to.be.ok;
     });
