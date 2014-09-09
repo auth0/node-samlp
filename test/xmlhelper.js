@@ -15,7 +15,13 @@ exports.verifySignature = function(assertion, cert) {
       }
     };
     sig.loadSignature(signature.toString());
-    return sig.checkSignature(assertion);
+    var result = sig.checkSignature(assertion);
+
+    if (!result) {
+      console.log(sig.validationErrors);
+    }
+    
+    return result;
   } catch (e) {
     console.log(e);
     return false;
