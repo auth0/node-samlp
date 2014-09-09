@@ -46,7 +46,7 @@ describe('samlp', function () {
       expect($('input[name="RelayState"]').attr('value')).to.equal('123');
     });
 
-    it.skip('should contain a valid signal assertion', function(){
+    it('should contain a valid signal assertion', function(){
       var isValid = xmlhelper.verifySignature(
                 signedAssertion, 
                 server.credentials.cert);

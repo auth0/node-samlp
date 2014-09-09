@@ -7,7 +7,7 @@ var path = require('path');
 
 var fakeUser = {
   id: '12345678',
-  displayName: 'John Flatabøáíéíáíðøßdœïvn',
+  displayName: 'John Foo', // 'John Flatabøáíéíáíðøßdœïvn'
   name: {
     familyName: 'Foo',
     givenName: 'John'
