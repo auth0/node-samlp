@@ -30,6 +30,7 @@ Options
 | signatureAlgorithm  | signature algorithm, options: rsa-sha1, rsa-sha256 | ```'rsa-sha256'``` |
 | digestAlgorithm     | digest algorithm, options: sha1, sha256          | ```'sha256'``` |
 | RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
+| sessionIndex          | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
 
 
 Add the middleware as follows:
