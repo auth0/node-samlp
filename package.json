@@ -1,6 +1,6 @@
 {
   "name": "samlp",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
