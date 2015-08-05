@@ -40,7 +40,7 @@ app.get('/samlp', samlp.auth({
   issuer:     'the-issuer',
   cert:       fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
   key:        fs.readFileSync(path.join(__dirname, 'some-cert.key')),
-  getPostUrl: function (wtrealm, wreply, req, callback) { 
+  getPostURL: function (wtrealm, wreply, req, callback) { 
                 return cb( null, 'http://someurl.com')
               }
 }));
@@ -51,7 +51,7 @@ app.get('/samlp', samlp.auth({
 This module also support generating SAML Protocol metadata (IDPSsoDescriptor):
 
 ~~~javascript
-app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', wsfed.metadata({
+app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({
   issuer:   'the-issuer',
   cert:     fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
 }));
