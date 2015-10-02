@@ -22,7 +22,8 @@
     "thumbprint": "0.0.1",
     "xmldom": "~0.1.15",
     "xpath": "0.0.5",
-    "xml-crypto": "0.0.13"
+    "xml-crypto": "0.0.13",
+    "xtend": "~1.0.3"
   },
   "devDependencies": {
     "chai": "~1.5.0",
@@ -32,7 +33,6 @@
     "xmldom": "~0.1.13",
     "cheerio": "~0.10.7",
     "xml-crypto": "0.0.10",
-    "xpath": "0.0.5",
-    "xtend": "~2.0.3"
+    "xpath": "0.0.5"
   }
 }
