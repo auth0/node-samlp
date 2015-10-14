@@ -31,6 +31,7 @@ Options
 | digestAlgorithm     | digest algorithm, options: sha1, sha256          | ```'sha256'``` |
 | RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
 | sessionIndex          | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
+| responseHandler       | custom response handler for SAML response f(req, res, SAMLResponse) | HTML response that POSTS to postUrl |
 
 
 Add the middleware as follows:
