@@ -17,12 +17,12 @@
   "author": "Auth0",
   "license": "mit",
   "dependencies": {
-    "saml": "~0.8.2",
     "ejs": "~0.8.3",
+    "saml": "^0.9.0",
     "thumbprint": "0.0.1",
+    "xml-crypto": "0.0.13",
     "xmldom": "~0.1.15",
     "xpath": "0.0.5",
-    "xml-crypto": "0.0.13",
     "xtend": "~1.0.3"
   },
   "devDependencies": {
