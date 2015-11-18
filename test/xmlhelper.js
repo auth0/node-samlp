@@ -4,7 +4,7 @@ var xmlCrypto = require('xml-crypto'),
 exports.verifySignature = function(assertion, cert) {
   try {
     var doc = new xmldom.DOMParser().parseFromString(assertion);
-    var signature = xmlCrypto.xpath.SelectNodes(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")[0];
+    var signature = xmlCrypto.xpath(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")[0];
     var sig = new xmlCrypto.SignedXml(null, { idAttribute: 'AssertionID' });
     sig.keyInfoProvider = {
       getKeyInfo: function (key) {

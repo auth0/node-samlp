@@ -20,7 +20,7 @@
     "ejs": "~0.8.3",
     "saml": "^0.9.0",
     "thumbprint": "0.0.1",
-    "xml-crypto": "0.0.13",
+    "xml-crypto": "0.8.1",
     "xmldom": "~0.1.15",
     "xpath": "0.0.5",
     "xtend": "~1.0.3"
@@ -32,7 +32,6 @@
     "request": "~2.14.0",
     "xmldom": "~0.1.13",
     "cheerio": "~0.10.7",
-    "xml-crypto": "0.0.10",
     "xpath": "0.0.5"
   }
 }
