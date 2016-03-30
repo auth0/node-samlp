@@ -42,7 +42,7 @@ app.get('/samlp', samlp.auth({
   cert:       fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
   key:        fs.readFileSync(path.join(__dirname, 'some-cert.key')),
   getPostURL: function (wtrealm, wreply, req, callback) { 
-                return cb( null, 'http://someurl.com')
+                return callback( null, 'http://someurl.com')
               }
 }));
 ~~~~
