@@ -73,9 +73,9 @@ describe('samlp metadata', function () {
         .to.equal(certToPem(server.credentials.cert));
     });
 
-    it('should not contain line breaks', function(){
+    it('should not contain blank line', function(){
       expect(content)
-        .to.not.contain('\n');
+        .to.not.contain('\n\s*\n');
     });
 
   });
