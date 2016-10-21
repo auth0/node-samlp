@@ -73,23 +73,28 @@ describe('samlp', function () {
 
 
     it('should map every attributes from profile', function(){
-      function validateAttribute(position, name, value) {
+      function validateAttribute(position, name, value, type, nameFormat) {
+
         expect(attributes[position].getAttribute('Name'))
           .to.equal(name);
+        expect(attributes[position].getAttribute('NameFormat'))
+        .to.equal(nameFormat);
+        expect(attributes[position].firstChild.getAttribute('xsi:type'))
+        .to.equal(type);
         expect(attributes[position].firstChild.textContent)
           .to.equal(value);
       }
 
-      validateAttribute(0, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', server.fakeUser.id);
-      validateAttribute(1, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',   server.fakeUser.emails[0].value);
-      validateAttribute(2, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name',           server.fakeUser.displayName);
-      validateAttribute(3, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname',      server.fakeUser.name.givenName);
-      validateAttribute(4, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname',         server.fakeUser.name.familyName);
+      validateAttribute(0, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier', String(server.fakeUser.id), 'xs:double', 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri');
+      validateAttribute(1, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',   server.fakeUser.emails[0].value, 'xs:string', 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri');
+      validateAttribute(2, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name',           server.fakeUser.displayName, 'xs:string', 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri');
+      validateAttribute(3, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname',      server.fakeUser.name.givenName, 'xs:string', 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri');
+      validateAttribute(4, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname',        server.fakeUser.name.familyName, 'xs:string', 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri');
     });
 
     it('should contains the name identifier', function(){
       expect(xmlhelper.getNameIdentifier(signedAssertion).textContent)
-        .to.equal(server.fakeUser.id);
+        .to.equal(String(server.fakeUser.id));
     });
 
     it('should set nameidentifier format to urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified by default', function(){
