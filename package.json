@@ -18,7 +18,7 @@
   "license": "mit",
   "dependencies": {
     "ejs": "~0.8.3",
-    "saml": "^0.9.0",
+    "saml": "auth0/node-saml#name-format-and-type",
     "thumbprint": "0.0.1",
     "xml-crypto": "0.8.1",
     "xmldom": "~0.1.15",
