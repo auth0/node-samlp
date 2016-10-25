@@ -35,7 +35,6 @@ describe('samlp signed response', function () {
     });
 
     it('should contain a valid signed response', function(){
-      console.log(signedResponse);
       var isValid = xmlhelper.verifySignature(
                 signedResponse,
                 server.credentials.cert);
