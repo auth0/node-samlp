@@ -55,7 +55,14 @@ module.exports.start = function(options, callback){
         getPostURL:         getPostURL,
         cert:               credentials.cert,
         key:                credentials.key
-      }, module.exports.options))(req, res, next);
+      }, module.exports.options))(req, res, function(err){
+
+        
+        if (err) {
+          return res.send(400, err.message);
+        } 
+        next();
+      });
   });
 
   app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({

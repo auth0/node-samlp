@@ -4,6 +4,10 @@ var request = require('request');
 var cheerio = require('cheerio');
 var xmldom = require('xmldom');
 var xmlhelper = require('./xmlhelper');
+var zlib = require('zlib');
+var encoder = require('../lib/encoders');
+var fs = require('fs');
+var path = require('path');
 
 describe('samlp', function () {
   before(function (done) {
@@ -66,11 +70,10 @@ describe('samlp', function () {
       expect(algorithm).to.equal('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256');
     });
 
-    it('should use sha256 as default diigest algorithm', function(){
+    it('should use sha256 as default digest algorithm', function(){
       var algorithm = xmlhelper.getDigestMethodAlgorithm(signedAssertion);
       expect(algorithm).to.equal('http://www.w3.org/2001/04/xmlenc#sha256');
     });
-
 
     it('should map every attributes from profile', function(){
       function validateAttribute(position, name, value, type, nameFormat) {
@@ -173,7 +176,7 @@ describe('samlp', function () {
     });
   });
 
-describe('when using a different name identifier format', function () {
+  describe('when using a different name identifier format', function () {
     var body, $, signedAssertion, attributes;
     
     before(function (done) {
@@ -202,7 +205,7 @@ describe('when using a different name identifier format', function () {
     });
   });
 
- describe('when sending SAMLRequest ID ', function () {
+  describe('when sending SAMLRequest ID ', function () {
     var body, $, signedAssertion, samlResponse;
     
     before(function (done) {
@@ -243,7 +246,7 @@ describe('when using a different name identifier format', function () {
     });
   });
 
- describe('when sending SAMLRequest without RelayState ', function () {
+  describe('when sending SAMLRequest without RelayState ', function () {
     var body, $, signedAssertion, samlResponse;
     
     before(function (done) {
@@ -268,6 +271,304 @@ describe('when using a different name identifier format', function () {
       expect(xmlhelper.getSubjectConfirmationData(signedAssertion).getAttribute('InResponseTo'))
         .to.equal('12345');
     });
+  });
 
+  describe('configured to accept SignedRequest', function(){
+    before(function () {
+      var cert = fs.readFileSync(path.join(__dirname, '/fixture/samlp.test-cert.pem'));
+      server.options = {  
+        signingCert:  cert,
+        thumbprints:  [encoder.thumbprint(cert)]
+      };
+    });
+
+    describe('HTTP Redirect', function(){
+      describe('when sending a not signed SAMLRequest', function(){
+        var error;
+
+        before(function (done) {
+          request.get({
+            jar: request.jar(), 
+            uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
+          }, function (err, response){
+            if(err) return done(err);
+            error = response.body;
+            done();
+          });
+        });
+
+        it('return signature missing error', function(){
+          expect(error.indexOf('Signature is missing') > -1).to.be.ok;
+        });
+      });
+
+      describe('when sending a signed SAMLRequest with ID that doesn\'t match', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference URI="#pfx41d8ef22-e612-8c50-9960-1b16f15741b3"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>yJN6cXUwQxTmMEsPesBP2NkqYFI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>g5eM9yPnKsmmE/Kh2qS7nfK8HoF6yHrAdNQxh70kh8pRI4KaNbYNOL9sF8F57Yd+jO6iNga8nnbwhbATKGXIZOJJSugXGAMRyZsj/rqngwTJk5KmujbqouR1SLFsbo7Iuwze933EgefBbAE4JRI7V2aD9YgmB3socPqAi2Qf97E=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIICajCCAdOgAwIBAgIBADANBgkqhkiG9w0BAQQFADBSMQswCQYDVQQGEwJ1czETMBEGA1UECAwKQ2FsaWZvcm5pYTEVMBMGA1UECgwMT25lbG9naW4gSW5jMRcwFQYDVQQDDA5zcC5leGFtcGxlLmNvbTAeFw0xNDA3MTcwMDI5MjdaFw0xNTA3MTcwMDI5MjdaMFIxCzAJBgNVBAYTAnVzMRMwEQYDVQQIDApDYWxpZm9ybmlhMRUwEwYDVQQKDAxPbmVsb2dpbiBJbmMxFzAVBgNVBAMMDnNwLmV4YW1wbGUuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7vU/6R/OBA6BKsZH4L2bIQ2cqBO7/aMfPjUPJPSn59d/f0aRqSC58YYrPuQODydUABiCknOn9yV0fEYm4bNvfjroTEd8bDlqo5oAXAUAI8XHPppJNz7pxbhZW0u35q45PJzGM9nCv9bglDQYJLby1ZUdHsSiDIpMbGgf/ZrxqawIDAQABo1AwTjAdBgNVHQ4EFgQU3s2NEpYx7wH6bq7xJFKa46jBDf4wHwYDVR0jBBgwFoAU3s2NEpYx7wH6bq7xJFKa46jBDf4wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQCPsNO2FG+zmk5miXEswAs30E14rBJpe/64FBpM1rPzOleexvMgZlr0/smF3P5TWb7H8Fy5kEiByxMjaQmml/nQx6qgVVzdhaTANpIE1ywEzVJlhdvw4hmRuEKYqTaFMLez0sRL79LUeDxPWw7Mj9FkpRYT+kAGiFomHop1nErV6Q==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></samlp:AuthnRequest>';
+
+          request.get({
+            jar: request.jar(), 
+            uri: 'http://localhost:5050/samlp',
+            qs: {
+              RelayState: '123',
+              SAMLRequest: new Buffer(SAMLRequest).toString('base64')
+            }
+          }, function (err, response){
+            if(err) return done(err);
+            error = response.body;
+            done();
+          });
+        });
+
+        it('should return signature check errors', function(){
+          expect(error).to.equal('Signature check errors: invalid signature: the signature refernces an element with uri #pfx41d8ef22-e612-8c50-9960-1b16f15741b3 but could not find such element in the xml');
+        });
+      });
+
+      describe('when sending a invalid signed SAMLRequest', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="pfx41d8ef22-e612-8c50-9960-1b16f15741b3" AssertionConsumerServiceURL="https://acs" Destination="https://destination" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference URI="#pfx41d8ef22-e612-8c50-9960-1b16f15741b3"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>yJN6cXUwQxTmMEsPesBP2NkqYFI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>g5eM9yPnKsmmE/Kh2qS7nfK8HoF6yHrAdNQxh70kh8pRI4KaNbYNOL9sF8F57Yd+jO6iNga8nnbwhbATKGXIZOJJSugXGAMRyZsj/rqngwTJk5KmujbqouR1SLFsbo7Iuwze933EgefBbAE4JRI7V2aD9YgmB3socPqAi2Qf97E=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIICajCCAdOgAwIBAgIBADANBgkqhkiG9w0BAQQFADBSMQswCQYDVQQGEwJ1czETMBEGA1UECAwKQ2FsaWZvcm5pYTEVMBMGA1UECgwMT25lbG9naW4gSW5jMRcwFQYDVQQDDA5zcC5leGFtcGxlLmNvbTAeFw0xNDA3MTcwMDI5MjdaFw0xNTA3MTcwMDI5MjdaMFIxCzAJBgNVBAYTAnVzMRMwEQYDVQQIDApDYWxpZm9ybmlhMRUwEwYDVQQKDAxPbmVsb2dpbiBJbmMxFzAVBgNVBAMMDnNwLmV4YW1wbGUuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7vU/6R/OBA6BKsZH4L2bIQ2cqBO7/aMfPjUPJPSn59d/f0aRqSC58YYrPuQODydUABiCknOn9yV0fEYm4bNvfjroTEd8bDlqo5oAXAUAI8XHPppJNz7pxbhZW0u35q45PJzGM9nCv9bglDQYJLby1ZUdHsSiDIpMbGgf/ZrxqawIDAQABo1AwTjAdBgNVHQ4EFgQU3s2NEpYx7wH6bq7xJFKa46jBDf4wHwYDVR0jBBgwFoAU3s2NEpYx7wH6bq7xJFKa46jBDf4wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQCPsNO2FG+zmk5miXEswAs30E14rBJpe/64FBpM1rPzOleexvMgZlr0/smF3P5TWb7H8Fy5kEiByxMjaQmml/nQx6qgVVzdhaTANpIE1ywEzVJlhdvw4hmRuEKYqTaFMLez0sRL79LUeDxPWw7Mj9FkpRYT+kAGiFomHop1nErV6Q==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></samlp:AuthnRequest>';
+
+          request.get({
+            jar: request.jar(), 
+            uri: 'http://localhost:5050/samlp',
+            qs: {
+              RelayState: '123',
+              SAMLRequest: new Buffer(SAMLRequest).toString('base64')
+            }
+          }, function (err, response){
+            if(err) return done(err);
+            error = response.body;
+            done();
+          });
+        });
+
+        it('should return signature check errors', function(){
+          expect(error).to.equal('Signature check errors: invalid signature: for uri #pfx41d8ef22-e612-8c50-9960-1b16f15741b3 calculated digest is CNSDTrlQsaLjOFN4js626JZBqP0= but the xml to validate supplies digest yJN6cXUwQxTmMEsPesBP2NkqYFI=');
+        });
+      });
+
+      describe('when sending a valid signed SAMLRequest but wrong certificate', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="pfx41d8ef22-e612-8c50-9960-1b16f15741b3" AssertionConsumerServiceURL="https://acs" Destination="https://destination" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference URI="#pfx41d8ef22-e612-8c50-9960-1b16f15741b3"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>CNSDTrlQsaLjOFN4js626JZBqP0=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>g5eM9yPnKsmmE/Kh2qS7nfK8HoF6yHrAdNQxh70kh8pRI4KaNbYNOL9sF8F57Yd+jO6iNga8nnbwhbATKGXIZOJJSugXGAMRyZsj/rqngwTJk5KmujbqouR1SLFsbo7Iuwze933EgefBbAE4JRI7V2aD9YgmB3socPqAi2Qf97E=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIICajCCAdOgAwIBAgIBADANBgkqhkiG9w0BAQQFADBSMQswCQYDVQQGEwJ1czETMBEGA1UECAwKQ2FsaWZvcm5pYTEVMBMGA1UECgwMT25lbG9naW4gSW5jMRcwFQYDVQQDDA5zcC5leGFtcGxlLmNvbTAeFw0xNDA3MTcwMDI5MjdaFw0xNTA3MTcwMDI5MjdaMFIxCzAJBgNVBAYTAnVzMRMwEQYDVQQIDApDYWxpZm9ybmlhMRUwEwYDVQQKDAxPbmVsb2dpbiBJbmMxFzAVBgNVBAMMDnNwLmV4YW1wbGUuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7vU/6R/OBA6BKsZH4L2bIQ2cqBO7/aMfPjUPJPSn59d/f0aRqSC58YYrPuQODydUABiCknOn9yV0fEYm4bNvfjroTEd8bDlqo5oAXAUAI8XHPppJNz7pxbhZW0u35q45PJzGM9nCv9bglDQYJLby1ZUdHsSiDIpMbGgf/ZrxqawIDAQABo1AwTjAdBgNVHQ4EFgQU3s2NEpYx7wH6bq7xJFKa46jBDf4wHwYDVR0jBBgwFoAU3s2NEpYx7wH6bq7xJFKa46jBDf4wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQQFAAOBgQCPsNO2FG+zmk5miXEswAs30E14rBJpe/64FBpM1rPzOleexvMgZlr0/smF3P5TWb7H8Fy5kEiByxMjaQmml/nQx6qgVVzdhaTANpIE1ywEzVJlhdvw4hmRuEKYqTaFMLez0sRL79LUeDxPWw7Mj9FkpRYT+kAGiFomHop1nErV6Q==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></samlp:AuthnRequest>';
+
+          request.get({
+            jar: request.jar(), 
+            uri: 'http://localhost:5050/samlp',
+            qs: {
+              RelayState: '123',
+              SAMLRequest: new Buffer(SAMLRequest).toString('base64')
+            }
+          }, function (err, response){
+            if(err) return done(err);
+            error = response.body;
+            done();
+          });
+        });
+
+        it('should return invalid signature', function(){
+          expect(error).to.equal('Signature check errors: invalid signature: the signature value g5eM9yPnKsmmE/Kh2qS7nfK8HoF6yHrAdNQxh70kh8pRI4KaNbYNOL9sF8F57Yd+jO6iNga8nnbwhbATKGXIZOJJSugXGAMRyZsj/rqngwTJk5KmujbqouR1SLFsbo7Iuwze933EgefBbAE4JRI7V2aD9YgmB3socPqAi2Qf97E= is incorrect');
+        });
+      });
+
+      describe('when sending a valid signed SAMLRequest with embeded cert', function(){
+        var body, samlResponse, signedAssertion, $;
+
+        before(function (done) {
+          var samlRequest = 'PHNhbWxwOkF1dGhuUmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiBEZXN0aW5hdGlvbj0iaHR0cDovL2xvY2FsaG9zdDo1MDUxL3NhbWxwIiBJRD0iX2NlZWFlZjQwMjAxNmMxMGRmM2FiIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTEtMDdUMTA6MTU6MjlaIiBQcm90b2NvbEJpbmRpbmc9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpiaW5kaW5nczpIVFRQLVBPU1QiIFZlcnNpb249IjIuMCI+PFNpZ25hdHVyZSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+PFNpZ25lZEluZm8+PENhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxkc2lnLW1vcmUjcnNhLXNoYTI1NiIvPjxSZWZlcmVuY2UgVVJJPSIjX2NlZWFlZjQwMjAxNmMxMGRmM2FiIj48VHJhbnNmb3Jtcz48VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9UcmFuc2Zvcm1zPjxEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTYiLz48RGlnZXN0VmFsdWU+RzQ2eG9DbmhiZWUzRjB0cW0yWklMamkvTHRmZEJQNWdnTml3emcxOEVxUT08L0RpZ2VzdFZhbHVlPjwvUmVmZXJlbmNlPjwvU2lnbmVkSW5mbz48U2lnbmF0dXJlVmFsdWU+VzVzS3FsOHRTYVJVZm9HSUJsYXVXbmR6WXNsWmRxc3BSQmlsa2pGSTlXVkxrTXlmWWZCckJza1VLMzJDckdDb3JZc0FkZUEyYW9rSUYwL3RRVUNISXdHcmF0cWZGVDZiVVNQdVBoT2JsZ3UzcWpmODI2Tm5hNzl1S2I4OXdDQnoyRzF0US9JSEVPZlJUNjcwZ25oZ0NiTzV4VlFZZnQvbmxzU281QW1sbkx6QXZsZW5JNFhZT3JZd3Q4bkJ6MGVnM3NTUlJmVWt5UGx1TDE2ck84bFdSdWVqenp6R250SjFiZDM5QzBZc0k1SjlIOWxMTm9LTXh1MFJwU1B2Z0llaGhESGJoc24zRVlsd25OcldKMUdINlhIakxKdmV1dGJuVWp2V0NEZ2U3Wi9XRUc2V2Eya01hMGFYM0VJa2lNYk0zeDFFZzd3bk1jMGM4OU9TU1FCNFF3PT08L1NpZ25hdHVyZVZhbHVlPjxLZXlJbmZvPjxYNTA5RGF0YT48WDUwOUNlcnRpZmljYXRlPk1JSUR0VENDQXAyZ0F3SUJBZ0lKQU1LUi9Oc3lmY2F6TUEwR0NTcUdTSWIzRFFFQkJRVUFNRVV4Q3pBSkJnTlZCQVlUQWtGVk1STXdFUVlEVlFRSUV3cFRiMjFsTFZOMFlYUmxNU0V3SHdZRFZRUUtFeGhKYm5SbGNtNWxkQ0JYYVdSbmFYUnpJRkIwZVNCTWRHUXdIaGNOTVRJeE1URXlNak0wTXpReFdoY05NVFl4TWpJeE1qTTBNelF4V2pCRk1Rc3dDUVlEVlFRR0V3SkJWVEVUTUJFR0ExVUVDQk1LVTI5dFpTMVRkR0YwWlRFaE1COEdBMVVFQ2hNWVNXNTBaWEp1WlhRZ1YybGtaMmwwY3lCUWRIa2dUSFJrTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2dEg0d0tMWWxJWFpsZllRRkp0WFpWQzNmRDhYTWFyend2Yi9mSFV5SjZOdk5TdE4rSDdHSHAzL1FoWmJTYVJ5cUs1aHU1eFh0RkxnbkkwUUc4b0UxTmxYYmN6akg0NUxlSFdoUElkYzJ1SFNwelhpYzc4a091Z01ZMXZuZzRKMTBQRjYrVDJGTmFpdjBpWGVJUXE5eGJ3d1BZcGZsVmlReUpuekdDSVo3VkdhbjZHYlJLenlUS2NCNTh5eDI0cEpxK0N2aUxYRVk1MlRJVzFsNWltY2pHdkx0bENwMXphOXFCWmE0WEdvVnFIaTFrUlhrZERTSHR5NmxaV2ozS3hvUnZUYmlhQkNIKzc1VTdyaWZTNmZSOWxxaldFNTdiQ0dvejcrQkJ1OVltUEt0STFLa3lIRnFXcHhhSmMvQUtmOXhnZytVdW1lcVZjaXJVbUFzSEpyTXdJREFRQUJvNEduTUlHa01CMEdBMVVkRGdRV0JCVHM4M25rTHRvWEZsbUJVdHMzRUl4Y1Z2a3ZjakIxQmdOVkhTTUViakJzZ0JUczgzbmtMdG9YRmxtQlV0czNFSXhjVnZrdmNxRkpwRWN3UlRFTE1Ba0dBMVVFQmhNQ1FWVXhFekFSQmdOVkJBZ1RDbE52YldVdFUzUmhkR1V4SVRBZkJnTlZCQW9UR0VsdWRHVnlibVYwSUZkcFpHZHBkSE1nVUhSNUlFeDBaSUlKQU1LUi9Oc3lmY2F6TUF3R0ExVWRFd1FGTUFNQkFmOHdEUVlKS29aSWh2Y05BUUVGQlFBRGdnRUJBQnc3dy81azRkNWRWRGdkL09PT21YZGFhQ0lLdnQ3ZDNudGx2MVNTdkFvS1Q4ZDhsdDk3RG01UnJtZWZCSTEzSTJ5aXZaZzViZlRnZTQrdkFWNlZkTEZkV2VGcDFiL0ZPWmtZVXY2QThvNUhXME9XUVlWWDI2eklxQmNHMlFybTNyZWlTbDVCTHZwajFXU3BDc1l2czVrYU80dkZwTWFrL0lDZ2RaRCtyeHd4ZjhWYi82Zm50S3l3V1NMZ3dLSDNtSitaMGtSbHBxMWcxb2llaU9tMS9ncFozNXMwWXVvclhaYmE5cHRmTENZU2dnZy9xYzNkM2QwdGJIcGxLWWt3Rm03ZjVPUkdIRFNENVNKbStnSTdSUEUrNGJPOHE3OVJQQWZiRzFVR3VKMGIvb2lnYWdjaUhoSnA4NTFTUVJZZjNKdU5TYzE3Qm5LMkw1SUV0empxcitRPTwvWDUwOUNlcnRpZmljYXRlPjwvWDUwOURhdGE+PC9LZXlJbmZvPjwvU2lnbmF0dXJlPjxzYW1sOklzc3VlciB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj5odHRwczovL2F1dGgwLWRldi1lZC5teS5zYWxlc2ZvcmNlLmNvbTwvc2FtbDpJc3N1ZXI+PC9zYW1scDpBdXRoblJlcXVlc3Q+';
+          request.get({
+            jar: request.jar(), 
+            uri: 'http://localhost:5050/samlp',
+            qs: {
+              RelayState: '123',
+              SAMLRequest: samlRequest
+            }
+          }, function (err, response, b){
+            if(err) return done(err);
+            expect(response.statusCode)
+              .to.equal(200);
+
+            body = b;
+            $ = cheerio.load(body);
+            var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+            samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+            signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
+            done();
+          });
+        });
+
+        it('should return invalid signature', function(){
+          expect(signedAssertion).to.be.ok;
+        });
+      });
+    });
+
+    describe('HTTP Redirect - Inflated', function(){
+      describe('when not sending Signature', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+
+          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+            if (err) return done(err);
+
+            request.get({
+              jar: request.jar(), 
+              uri: 'http://localhost:5050/samlp',
+              qs: {
+                RelayState: '123',
+                SAMLRequest: buffer.toString('base64')
+              }
+            }, function (err, response){
+              if(err) return done(err);
+              error = response.body;
+              done();
+            });
+          });
+        });
+
+        it('should return signature check errors', function(){
+          expect(error).to.equal("Signature is missing (xpath: //*[local-name(.)='AuthnRequest']/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#'])");
+        });
+      });
+
+      describe('when sending invalid Signature', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+
+          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+            if (err) return done(err);
+
+            request.get({
+              jar: request.jar(), 
+              uri: 'http://localhost:5050/samlp',
+              qs: {
+                RelayState: '123',
+                SAMLRequest: buffer.toString('base64'),
+                Signature: '123123'
+              }
+            }, function (err, response){
+              if(err) return done(err);
+              error = response.body;
+              done();
+            });
+          });
+        });
+
+        it('should return missing signature algorithm message', function(){
+          expect(error).to.equal("Signature Algorithm is missing");
+        });
+      });      
+
+      describe('when sending invalid SigAlgorithm', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+
+          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+            if (err) return done(err);
+
+            request.get({
+              jar: request.jar(), 
+              uri: 'http://localhost:5050/samlp',
+              qs: {
+                RelayState: '123',
+                SAMLRequest: buffer.toString('base64'),
+                Signature: '123123',
+                SigAlg: '123'
+              }
+            }, function (err, response){
+              if(err) return done(err);
+              error = response.body;
+              done();
+            });
+          });
+        });
+
+        it('should return invalid SigAlgorithm message', function(){
+          expect(error).to.equal("Invalid signature algorithm. Supported algorithms are http://www.w3.org/2001/04/xmldsig-more#rsa-sha1 and http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+        });
+      });
+
+      describe('when valid algorithm and invalid signature', function(){
+        var error;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+
+          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+            if (err) return done(err);
+
+            request.get({
+              jar: request.jar(), 
+              uri: 'http://localhost:5050/samlp',
+              qs: {
+                RelayState: '123',
+                SAMLRequest: buffer.toString('base64'),
+                Signature: '123123',
+                SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+              }
+            }, function (err, response){
+              if(err) return done(err);
+              error = response.body;
+              done();
+            });
+          });
+        });
+
+        it('should return missing signature check errors', function(){
+          expect(error).to.equal("Signature check errors: The signature provided (123123) does not match the one calculated");
+        });
+      });
+
+      describe('when valid signature and algorithm', function(){
+        var body, samlResponse, signedAssertion, $;
+
+        before(function (done) {
+          var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+
+          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+            if (err) return done(err);
+
+            request.get({
+              jar: request.jar(), 
+              uri: 'http://localhost:5050/samlp',
+              qs: {
+                RelayState: '123',
+                SAMLRequest: buffer.toString('base64'),
+                Signature: 'HaX739zOyRn4PR2pi1Bud05rHbPGfppz5x5crr2EuOzLbfNuvLeK//ZCNsC/R/8B4CWe2SYYCYJ6UhBRvhCx8G7H92TIw8TjbsTfAWemp6mJh+zBqaI2It8sFZMYntsbd0jfBo4CbuM8872cNQkdedV5V56gaErjBA8z3HoyTWpQi9nH2fjtmDDfoQmoVum5q+vgbm103qxjH0j/gR+OXi5Rne8ijMLhhXgt9EdLmN8OS6l1LRUPe3XDLz6ZKbo9T2k6GR1x+w6bN18JOdeCwDn+nx4fmPbGGrcz/DT/3mTL5MY7TeRDz8rGSCZ5+yDNtmgQ9Nv2O//joonmRBkF6Q==',
+                SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+              }
+            }, function (err, response, b){
+                if(err) return done(err);
+              
+                expect(response.statusCode)
+                  .to.equal(200);
+
+                body = b;
+                $ = cheerio.load(body);
+                var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+                samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+                signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
+                done();
+            });
+          });
+        });
+
+        it('should return assertion', function(){
+          expect(signedAssertion).to.be.ok;
+        });
+      });                  
+    });
   });
 });
