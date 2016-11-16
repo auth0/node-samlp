@@ -571,4 +571,93 @@ describe('samlp', function () {
       });                  
     });
   });
+
+  describe('configured signature signatureNamespacePrefix', function(){
+    describe('signResponse = true', function(){
+      var body, $, signedAssertion, samlResponse;
+
+      before(function (done) {
+        server.options = {  signatureNamespacePrefix: 'ds' , signResponse : true };
+        request.get({
+          jar: request.jar(), 
+          uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
+        }, function (err, response, b){
+          if(err) return done(err);
+          expect(response.statusCode)
+            .to.equal(200);
+
+          body = b;
+          $ = cheerio.load(body);
+          var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+          samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+          signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
+          done();
+        });
+      });
+
+      it('should return signature with the specified signatureNamespacePrefix inside the response', function(){
+        var doc = new xmldom.DOMParser().parseFromString(samlResponse);
+        var signature = doc.documentElement.getElementsByTagName('ds:Signature');
+        expect(signature[0].parentNode.nodeName).to.equal('samlp:Response');
+      });
+    });
+
+    describe('signResponse = false', function(){
+      var body, $, signedAssertion, samlResponse;
+
+      before(function (done) {
+        server.options = {  signatureNamespacePrefix: 'ds' , signResponse : false };
+        request.get({
+          jar: request.jar(), 
+          uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
+        }, function (err, response, b){
+          if(err) return done(err);
+          expect(response.statusCode)
+            .to.equal(200);
+
+          body = b;
+          $ = cheerio.load(body);
+          var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+          samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+          signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
+          done();
+        });
+      });
+
+      it('should return signature with the specified signatureNamespacePrefix inside the assertion', function(){
+        var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+        var signature = doc.documentElement.getElementsByTagName('ds:Signature');
+        expect(signature[0].parentNode.nodeName).to.equal('saml:Assertion');
+      });
+    });
+
+    describe('invalid signatureNamespacePrefix', function(){
+      var body, $, signedAssertion, samlResponse;
+
+      before(function (done) {
+        server.options = {  signatureNamespacePrefix: 123 , signResponse : false };
+        request.get({
+          jar: request.jar(), 
+          uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
+        }, function (err, response, b){
+          if(err) return done(err);
+          expect(response.statusCode)
+            .to.equal(200);
+
+          body = b;
+          $ = cheerio.load(body);
+          var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+          samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+          signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
+          done();
+        });
+      });
+
+      it('should return signature without signatureNamespacePrefix inside the assertion', function(){
+        var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+        var signature = doc.documentElement.getElementsByTagName('Signature');
+        expect(signature[0].parentNode.nodeName).to.equal('saml:Assertion');
+      });
+    });
+  });
 });
