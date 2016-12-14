@@ -56,13 +56,30 @@ module.exports.start = function(options, callback){
         cert:               credentials.cert,
         key:                credentials.key
       }, module.exports.options))(req, res, function(err){
-
-        
         if (err) {
           return res.send(400, err.message);
         } 
         next();
       });
+  });
+
+  app.get('/logout', function(req, res, next) {
+    getPostURL({}, {}, req, function (err, url) {
+      samlp.logout(xtend({}, {
+          deflate:            true,
+          issuer:             'urn:fixture-test',
+          protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+          cert:               credentials.cert,
+          key:                credentials.key,
+          identityProviderUrl: url,
+          identityProviderSigningCert: credentials.cert // TODO validate LogoutRequest signature
+        }, module.exports.options))(req, res, function (err) {
+          if (err) {
+            return res.send(400, err.message);
+          } 
+          next();
+        });
+    })
   });
 
   app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({
