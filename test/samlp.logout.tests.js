@@ -3,24 +3,20 @@ var server = require('./fixture/server');
 var request = require('request');
 var cheerio = require('cheerio');
 var xmldom = require('xmldom');
-var xmlhelper = require('./xmlhelper');
 var zlib = require('zlib');
-var encoder = require('../lib/encoders');
-var fs = require('fs');
-var path = require('path');
 
-describe('samlp', function () {
+describe('samlp logout', function () {
   before(function (done) {
     server.start( { 
       audience: 'https://auth0-dev-ed.my.salesforce.com'
     },done);
   });
-  
+
   after(function (done) {
     server.close(done);
   });
 
-  var body, $, signedAssertion, attributes, logoutResultValue;
+  var body, $, signedAssertion, logoutResultValue;
 
   beforeEach(function (done) {
     request.get({
@@ -36,12 +32,11 @@ describe('samlp', function () {
       var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
       var decoded = new Buffer(SAMLResponse, 'base64').toString();
       signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
-      attributes = xmlhelper.getAttributes(signedAssertion);
       done();
     });
   });
 
-  describe('logout SP initiated - Redirect binding (GET)', function () {
+  describe('SP initiated - Redirect binding (GET)', function () {
     // SAMLRequest: base64 encoded + deflated + URLEncoded
     // Signature: URLEncoded
     // SigAlg: URLEncoded
@@ -76,6 +71,29 @@ describe('samlp', function () {
 
     it('should respond with a Success value', function () {
       expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+    });
+  });
+
+  // IdP Initiated with no Session Participants should not happen
+  // At least we should have 1 session participant. Still should not return an error
+  describe('IdP initiated', function () {
+    var body;
+    before(function (done) {
+      request.get({
+        jar: request.jar(),
+        followRedirect: false,
+        uri: 'http://localhost:5050/logout'
+      }, function (err, response) {
+        if(err) return done(err);
+        expect(response.statusCode).to.equal(200);
+        body = response.body;
+
+        done();
+      });
+    });
+
+    it('should respond with a Success value', function () {
+      expect(body).to.equal('OK');
     });
   });
 });

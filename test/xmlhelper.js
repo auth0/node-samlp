@@ -1,6 +1,6 @@
-var xmlCrypto = require('xml-crypto'),
-    xmldom = require('xmldom');
-    
+var xmlCrypto = require('xml-crypto');
+var xmldom = require('xmldom');
+
 exports.verifySignature = function(assertion, cert) {
   try {
     var doc = new xmldom.DOMParser().parseFromString(assertion);
@@ -35,6 +35,12 @@ exports.getIssuer = function(assertion) {
   return issuer[0].textContent;
 };
 
+exports.getElementText = function(assertion, elementName) {
+  var doc = new xmldom.DOMParser().parseFromString(assertion);
+  var element = doc.documentElement.getElementsByTagName(elementName);
+  return element[0].textContent;
+};
+
 exports.getDestination = function(response) {
   var doc = new xmldom.DOMParser().parseFromString(response);
   var destination = doc.documentElement.getAttribute('Destination');
@@ -63,6 +69,11 @@ exports.getIssueInstant = function(assertion) {
 exports.getConditions = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement.getElementsByTagName('saml:Conditions');
+};
+
+exports.getConsent = function(assertion) {
+  var doc = new xmldom.DOMParser().parseFromString(assertion);
+  return doc.documentElement.getAttribute('Consent');
 };
 
 exports.getAudiences = function(assertion) {

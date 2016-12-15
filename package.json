@@ -4,7 +4,8 @@
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/.bin/_mocha -R spec",
+    "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -27,10 +28,12 @@
     "xtend": "^1.0.3"
   },
   "devDependencies": {
+    "body-parser": "^1.15.2",
     "chai": "~1.5.0",
+    "cheerio": "~0.10.7",
     "express": "~3.1.0",
+    "istanbul": "^0.4.5",
     "mocha": "~1.8.1",
-    "request": "~2.14.0",
-    "cheerio": "~0.10.7"
+    "request": "~2.14.0"
   }
 }
