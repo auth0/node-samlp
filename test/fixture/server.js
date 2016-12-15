@@ -80,7 +80,7 @@ module.exports.start = function(options, callback){
         protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
         cert:               credentials.cert,
         key:                credentials.key,
-        identityProviderUrl: url,
+        destination:        url,
       }, module.exports.options))(req, res, function (err) {
         if (err) {
           return res.send(400, err.message);
