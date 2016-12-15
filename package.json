@@ -18,12 +18,13 @@
   "license": "mit",
   "dependencies": {
     "ejs": "~0.8.3",
+    "querystring": "^0.2.0",
     "saml": "^0.10.2",
     "thumbprint": "0.0.1",
     "xml-crypto": "0.8.4",
     "xmldom": "~0.1.15",
     "xpath": "0.0.5",
-    "xtend": "~1.0.3"
+    "xtend": "^1.0.3"
   },
   "devDependencies": {
     "chai": "~1.5.0",

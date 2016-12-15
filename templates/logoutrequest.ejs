@@ -1,0 +1,17 @@
+<samlp:LogoutRequest
+    ID="_<%= ID %>"
+    Version="2.0"
+    IssueInstant="<%= IssueInstant %>"
+    Destination="<%= Destination %>"
+    Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified"
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+  <Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion"><%= Issuer %></Issuer>
+  <NameID xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
+<% if (NameID.NameQualifier) { %> NameQualifier="<%= NameID.NameQualifier %>"<% } -%>
+<% if (NameID.SPNameQualifier) { %> SPNameQualifier="<%= NameID.SPNameQualifier %>"<% } -%>
+<% if (NameID.Format) { %> Format="<%= NameID.Format %>"<% } -%>
+<% if (NameID.SPProvidedID) { %> SPProvidedID="<%= NameID.SPProvidedID %>"<% } -%>><%= NameID.value %></NameID>
+  <% if (locals.SessionIndex) { %>
+  <samlp:SessionIndex><%= locals.SessionIndex %></samlp:SessionIndex>
+  <% } %>
+</samlp:LogoutRequest>

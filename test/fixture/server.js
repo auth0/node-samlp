@@ -72,6 +72,24 @@ module.exports.start = function(options, callback){
     postEndpointPath:     '/login/callback'
   }));
 
+  app.get('/logout', function(req, res, next) {
+    getPostURL({}, {}, req, function (err, url) {
+      samlp.logout(xtend({}, {
+        deflate:            true,
+        issuer:             'urn:fixture-test',
+        protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+        cert:               credentials.cert,
+        key:                credentials.key,
+        identityProviderUrl: url,
+      }, module.exports.options))(req, res, function (err) {
+        if (err) {
+          return res.send(400, err.message);
+        } 
+        next();
+      });
+    });
+  });
+
   var server = http.createServer(app).listen(5050, callback);
   module.exports.close = server.close.bind(server);
 };
