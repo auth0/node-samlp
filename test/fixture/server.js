@@ -27,6 +27,7 @@ var credentials = {
   pkcs7:    fs.readFileSync(path.join(__dirname, 'samlp.test-cert.pb7'))
 };
 
+module.exports.credentials = credentials;
 module.exports.options = {};
 
 module.exports.start = function(options, callback){
