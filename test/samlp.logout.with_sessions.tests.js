@@ -7,7 +7,7 @@ var xmlhelper     = require('./xmlhelper');
 var zlib          = require('zlib');
 var utils         = require('../lib/utils');
 var qs            = require('querystring');
-var InMemoryStore = require('../lib/in_memory_store');
+var InMemoryStore = require('../lib/store/in_memory_store');
 
 describe('samlp logout with Session Participants', function () {
   var sessions = [];
@@ -19,8 +19,13 @@ describe('samlp logout with Session Participants', function () {
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       issuer: samlIdPIssuer,
       store: testStore,
-      getSessions: function (cb) {
-        cb(null, sessions);
+      sessionHandler: {
+        getActiveSessions: function (cb) {
+          cb(null, sessions);
+        },
+        clearIdPSession: function(cb){
+          cb()
+        }
       }
     },done);
   });
