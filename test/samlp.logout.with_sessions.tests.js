@@ -203,7 +203,7 @@ describe('samlp logout with Session Participants', function () {
           }
         }; 
 
-        expect(utils.validateSignature(params, "SAMLRequest", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
+        expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
 
       describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
@@ -286,7 +286,7 @@ describe('samlp logout with Session Participants', function () {
             }
           };
 
-          expect(utils.validateSignature(params, "SAMLResponse", sessionParticipantLogoutResponse, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;        
+          expect(utils.validateSignature(params, "LOGOUT_RESPONSE", sessionParticipantLogoutResponse, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;        
         });
 
         it('should remove session from sessions array', function () {
@@ -428,7 +428,7 @@ describe('samlp logout with Session Participants', function () {
 
         // TODO: Review as we need to merge validation methods
         var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutRequest);        
-        expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "SAMLRequest", doc, { signingCert: sessionParticipant1.cert })).to.be.undefined;
+        expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "LOGOUT_REQUEST", doc, { signingCert: sessionParticipant1.cert })).to.be.undefined;
       });
 
       describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
@@ -487,7 +487,7 @@ describe('samlp logout with Session Participants', function () {
           
           // TODO: Review as we need to merge validation methods          
           var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutResponse);                  
-          expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "SAMLResponse", doc, { signingCert: sessionParticipant2.cert })).to.be.undefined;
+          expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "LOGOUT_RESPONSE", doc, { signingCert: sessionParticipant2.cert })).to.be.undefined;
         });
 
         it('should remove session from sessions array', function () {
