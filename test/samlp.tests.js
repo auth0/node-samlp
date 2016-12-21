@@ -298,7 +298,7 @@ describe('samlp', function () {
         });
 
         it('return signature missing error', function(){
-          expect(error.indexOf('Signature is missing') > -1).to.be.ok;
+          expect(error).to.equal("SAMLRequest message MUST be signed when using an asynchronous binding (POST or Redirect)");
         });
       });
 
@@ -435,11 +435,11 @@ describe('samlp', function () {
         });
 
         it('should return signature check errors', function(){
-          expect(error).to.equal("Signature is missing (xpath: //*[local-name(.)='AuthnRequest']/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#'])");
+          expect(error).to.equal("SAMLRequest message MUST be signed when using an asynchronous binding (POST or Redirect)");
         });
       });
 
-      describe('when sending invalid Signature', function(){
+      describe('when not sending SigAlg', function(){
         var error;
 
         before(function (done) {
@@ -464,12 +464,12 @@ describe('samlp', function () {
           });
         });
 
-        it('should return missing signature algorithm message', function(){
+        it('should return missing Signature Algorithm message', function(){
           expect(error).to.equal("Signature Algorithm is missing");
         });
       });      
 
-      describe('when sending invalid SigAlgorithm', function(){
+      describe('when sending invalid Sigature Algorithm', function(){
         var error;
 
         before(function (done) {
@@ -495,7 +495,7 @@ describe('samlp', function () {
           });
         });
 
-        it('should return invalid SigAlgorithm message', function(){
+        it('should return invalid Signature Algorithm message', function(){
           expect(error).to.equal("Invalid signature algorithm. Supported algorithms are http://www.w3.org/2001/04/xmldsig-more#rsa-sha1 and http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         });
       });

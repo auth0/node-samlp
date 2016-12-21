@@ -188,16 +188,16 @@ describe('samlp logout with Session Participants', function () {
         expect(sessionParticipantLogoutRequestSigAlg).to.exist;
         expect(sessionParticipantLogoutRequestSignature).to.exist;
 
-        var signedParams =  {
-          SAMLRequest: SAMLRequest,
-          RelayState: sessionParticipantLogoutRequestRelayState,
-          SigAlg: sessionParticipantLogoutRequestSigAlg
+        var params =  {
+          query: {
+            SAMLRequest: SAMLRequest,
+            RelayState: sessionParticipantLogoutRequestRelayState,
+            SigAlg: sessionParticipantLogoutRequestSigAlg,
+            Signature: sessionParticipantLogoutRequestSignature
+          }
         }; 
 
-        var alg = sessionParticipantLogoutRequestSigAlg.split('#')[1].toUpperCase();
-
-        expect(utils.validateSignature(sessionParticipantLogoutRequestSignature,
-          qs.stringify(signedParams), server.credentials.cert.toString(), alg)).to.be.true;
+        expect(utils.validateSignature(params, "SAMLRequest", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
 
       describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
@@ -271,16 +271,16 @@ describe('samlp logout with Session Participants', function () {
           expect(sessionParticipantLogoutResponseSigAlg).to.exist;
           expect(sessionParticipantLogoutResponseSignature).to.exist;
 
-          var signedParams =  {
-            SAMLResponse: SAMLResponse,
-            RelayState: sessionParticipantLogoutResponseRelayState,
-            SigAlg: sessionParticipantLogoutResponseSigAlg
-          }; 
+          var params =  {
+            query: {
+              SAMLResponse: SAMLResponse,
+              RelayState: sessionParticipantLogoutResponseRelayState,
+              SigAlg: sessionParticipantLogoutResponseSigAlg,
+              Signature: sessionParticipantLogoutResponseSignature
+            }
+          };
 
-          var alg = sessionParticipantLogoutResponseSigAlg.split('#')[1].toUpperCase();
-
-          expect(utils.validateSignature(sessionParticipantLogoutResponseSignature,
-            qs.stringify(signedParams), server.credentials.cert.toString(), alg)).to.be.true;
+          expect(utils.validateSignature(params, "SAMLResponse", sessionParticipantLogoutResponse, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;        
         });
 
         it('should remove session from sessions array', function () {
@@ -416,16 +416,13 @@ describe('samlp logout with Session Participants', function () {
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
       });
 
-      it('should validate LogoutRequest signature', function (done) {
+      it('should validate LogoutRequest signature', function () {
         expect(SAMLRequest).to.exist;
         expect(sessionParticipantLogoutRequestRelayState).to.exist;
 
         // TODO: Review as we need to merge validation methods
         var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutRequest);        
-        utils.validateXmlSignature(doc, { cert: sessionParticipant1.cert, signature: "//*[local-name(.)='LogoutRequest']/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']" }, function(err, xml){
-          expect(xml).to.exist;
-          done();
-        });
+        expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "SAMLRequest", doc, { signingCert: sessionParticipant1.cert })).to.be.undefined;
       });
 
       describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
@@ -478,16 +475,13 @@ describe('samlp logout with Session Participants', function () {
           expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
         });
 
-        it('should validate LogoutResponse signature', function (done) {
+        it('should validate LogoutResponse signature', function () {
           expect(SAMLResponse).to.exist;
           expect(sessionParticipantLogoutResponseRelayState).to.exist;
           
           // TODO: Review as we need to merge validation methods          
           var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutResponse);                  
-          utils.validateXmlSignature(doc, { cert: sessionParticipant2.cert, signature: "//*[local-name(.)='LogoutResponse']/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']" }, function(err, xml){
-            expect(xml).to.exist;
-            done();
-          });
+          expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "SAMLResponse", doc, { signingCert: sessionParticipant2.cert })).to.be.undefined;
         });
 
         it('should remove session from sessions array', function () {
