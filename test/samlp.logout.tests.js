@@ -74,6 +74,47 @@ describe('samlp logout', function () {
     });
   });
 
+  describe('SP initiated - HTTP Post Binding', function(){
+    var samlResponse, relayState;
+    // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+    //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+    //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+    //   <saml:SessionIndex>1</saml:SessionIndex>
+    // </samlp:LogoutRequest>
+    before(function (done) {
+      request.post({
+        jar: request.jar(),
+        followRedirect: false,
+        uri: 'http://localhost:5050/logout',
+        json: true,
+        body: {
+          SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5CSFdCdTdVbkJsNUF5VHFONFBnZEJ5M3lQc3IvZ0VPNG1KT0xPNm01Rm1tM1FtaVlOR0FlSWdJOVVXbmpuTnErWDc4QWE0SWIxbFBxOEsrblM5cTZ6UjEwK0xWZmM4U2YwR3dhdTdXTVpFNmVhR29PbCtCYUEvOGxUR0pBbGpScjJyNGtjME90S2w4dnJub2M0a3RGdXNsVUVOaDBaUXRYSkJiaTgvaEFzM1dXQTVNYldvQXJuUHJHTjFwK2pvdGIzOHc5ZnhEbUVhdG5yUmdXZ3BQa21GWVJockY5dkpEREJMeTkzbS9XQXc1c3NKbVFoYVNoaldtRkx2OVBpQ0ZRd08yV1B5Zk1RV2U5K2U0VDdXb3d1Y1ZkT2FZWHk5dm54REdXS01wSDBGVnRjR2ZRV0pmUzEwcXlCSHNwY25TemNVbUMxaWFPM3g1RzM0bUJXOXRzK1E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+          RelayState: '123'
+        }
+      }, function (err, response){
+        if(err) return done(err);
+        expect(response.statusCode).to.equal(200);
+        $ = cheerio.load(response.body);
+        var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+        relayState = $('input[name="RelayState"]').attr('value');        
+        samlResponse = new Buffer(SAMLResponse, 'base64');
+        signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(samlResponse)[1];
+        var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+        logoutResultValue = doc.documentElement.getAttribute('Value');
+
+        done();
+      });
+    });
+
+    it('should respond with a Success value', function () {
+      expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+    });
+
+     it('should return RelayState', function () {
+      expect(relayState).to.equal('123');
+    });
+  });
+
   // IdP Initiated with no Session Participants should not happen
   // At least we should have 1 session participant. Still should not return an error
   describe('IdP initiated', function () {

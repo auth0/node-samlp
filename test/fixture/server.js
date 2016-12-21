@@ -39,6 +39,7 @@ module.exports.start = function(options, callback){
 
   var app = express();
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(express.json());
 
   app.configure(function(){
     this.use(function(req,res,next){
@@ -79,6 +80,23 @@ module.exports.start = function(options, callback){
         deflate:            true,
         issuer:             'urn:fixture-test',
         protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+        cert:               credentials.cert,
+        key:                credentials.key,
+        destination:        url,
+      }, module.exports.options))(req, res, function (err) {
+        if (err) {
+          return res.send(400, err.message);
+        } 
+        next();
+      });
+    });
+  });
+
+  app.post('/logout', function(req, res, next) {
+    getPostURL({}, {}, req, function (err, url) {
+      samlp.logout(xtend({}, {
+        issuer:             'urn:fixture-test',
+        protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
         cert:               credentials.cert,
         key:                credentials.key,
         destination:        url,
