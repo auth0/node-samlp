@@ -24,7 +24,7 @@ describe('samlp logout with Session Participants', function () {
           cb(null, sessions);
         },
         clearIdPSession: function(cb){
-          cb()
+          cb();
         }
       }
     },done);
@@ -117,6 +117,7 @@ describe('samlp logout with Session Participants', function () {
       var sessionParticipantLogoutRequestSigAlg;
       var sessionParticipantLogoutRequestSignature;
 
+      // TODO: Use different certs for each session
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
         nameID: 'foo@example.com',
