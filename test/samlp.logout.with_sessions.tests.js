@@ -259,8 +259,8 @@ describe('samlp logout with Session Participants', function () {
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
-          // expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); //TODO
-          //TODO InResponseTo
+          // TODO: expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
+          // TODO: InResponseTo
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
         });
 
@@ -469,8 +469,8 @@ describe('samlp logout with Session Participants', function () {
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
-          // expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); //TODO
-          //TODO InResponseTo
+          // TODO: expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
+          // TODO: InResponseTo
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
         });
 
