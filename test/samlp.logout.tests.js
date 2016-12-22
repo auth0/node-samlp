@@ -19,6 +19,12 @@ describe('samlp logout', function () {
   var body, $, signedAssertion, logoutResultValue;
 
   beforeEach(function (done) {
+    // <?xml version="1.0" encoding="UTF-8"?>
+    // <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://login.salesforce.com"
+    //   Destination="https://contoso.auth0.com/saml" ID="_2N5GGp2nmITCFbcyGSKjaQ3ai6Kx9cAwDhBGX1gAJyvCrlJvoEQdjEgTsfajgM9m7j.w.I9Fz1ddVjZ9lKZChcsptp9kxkCuqcwbeNe.lJyVQpB8iSa4awFYsj9A5r7REb5JpHH72B6feguHFFPE8Mak3u4hSEKl9_8moiXLdA57WVhzwa8XYxn4mDshSp3Xb0PEZKODHMtxlVXaycGYuMgC20GpfCA"
+    //   IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0">
+    //   <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://auth0-dev-ed.my.salesforce.com</saml:Issuer>
+    // </samlp:AuthnRequest>
     request.get({
       jar: request.jar(), 
       uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
@@ -197,12 +203,7 @@ describe('samlp logout', function () {
     });
   });
 
-  describe.only('SP initiated - with default configuration', function(){
-    before(function(){
-      // Remove it 
-      server.options.protocolBinding = '';
-    });
-
+  describe('SP initiated - with default configuration', function(){
     // SAMLRequest: base64 encoded + deflated + URLEncoded
     // Signature: URLEncoded
     // SigAlg: URLEncoded
@@ -213,6 +214,8 @@ describe('samlp logout', function () {
     //   <saml:SessionIndex>1</saml:SessionIndex>
     // </samlp:LogoutRequest>
     before(function (done) {
+      server.options.protocolBinding = '';
+      
       request.get({
         jar: request.jar(),
         followRedirect: false,
