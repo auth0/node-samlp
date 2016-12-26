@@ -8,6 +8,18 @@ var zlib          = require('zlib');
 var utils         = require('../lib/utils');
 var qs            = require('querystring');
 var InMemoryStore = require('../lib/store/in_memory_store');
+var fs            = require('fs');
+var path          = require('path');
+
+var sp1_credentials = {
+  cert:     fs.readFileSync(path.join(__dirname, 'fixture', 'sp1.pem')),
+  key:      fs.readFileSync(path.join(__dirname, 'fixture', 'sp1.key')),
+};
+
+var sp2_credentials = {
+  cert:     fs.readFileSync(path.join(__dirname, 'fixture', 'sp2.pem')),
+  key:      fs.readFileSync(path.join(__dirname, 'fixture', 'sp2.key')),
+};
 
 describe('samlp logout with Session Participants', function () {
   var sessions = [], failed, returnError;
@@ -75,6 +87,7 @@ describe('samlp logout with Session Participants', function () {
           nameID: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert // SP1 public Cert
         });
       });
 
@@ -91,7 +104,7 @@ describe('samlp logout with Session Participants', function () {
         request.get({
           jar: request.jar(),
           followRedirect: false,
-          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8NAEIXvhf6HsPdNM2mtdWiDhSIEqgdbPHjbbqYazO7GnQ0Uf73bVDAKetnDm%2B%2FNm8cuWZmmxa17cV14pPeOOCQn01jGfrISnbfoFNeMVhliDBp36%2Fst5mmGrXfBadeIgeV%2Fh2ImH2pnRVJuVuJs8DLPM32dXZHUEB8AmsubhZpJ0sfZ4aBpNoVF5Jk7Ki0HZcNK5BnMJeQSpntYYAYI%2BbNInshzXB7HaSaK8ShJlucI7L2%2BeA2hZZxMjs4dlOeubZ0P6QfZivgt1c4sJ0P82%2F8Qi5Sb5M55o8LfDSGFXqkreexRJKPqZl1VnphFEXNv6aRM29Ag7bJ8kLaLcGxRxrNOBXxRP8Tx6KL%2B%2BrniEw%3D%3D&Signature=KH%2FBMO0DJyS2Ffy%2B6Rnb11pAF37Y%2Beua7RHcFhVrwgxJEqsx59vTelrfPt771JPfr7%2BoG1uYwwO3Algs59yTeqmU35x18Bf2e0yWugqEF7wxHETCjrwbCK1YjYg0ilwCojk%2FBTTv2Rs%2BY7RB21Ou1GShT1uXv8WItj7E2qnr%2B6kHY5XJWTJukZa9Vnkx%2FiisA7n6UfnnGcWMdltYeOvyHvOFMVG43dDxBms9WKMKdxn6NJ7i2V1v7nXj1DoXD4PDH5B6aevkA49c6mpzozyXKLeXLys%2FvPNNT4cC1jmWvuen5pe%2FE1WfgcZcZvj2GGaxs36fdH%2FHsIcyDvE%2Bj7ngYw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+          uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
           if(err) return done(err);
           expect(response.statusCode).to.equal(302);
@@ -126,13 +139,12 @@ describe('samlp logout with Session Participants', function () {
       var sessionParticipantLogoutRequestSigAlg;
       var sessionParticipantLogoutRequestSignature;
 
-      // TODO: Use different certs for each session
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
         nameID: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: server.credentials.cert // SP1 public Cert
+        cert: sp1_credentials.cert // SP1 public Cert
       };
 
       var sessionParticipant2 = {
@@ -140,7 +152,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'bar@example.com',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: server.credentials.cert // SP2 public Cert
+        cert: sp2_credentials.cert // SP2 public Cert
       };
 
       before(function () {
@@ -163,7 +175,7 @@ describe('samlp logout with Session Participants', function () {
         request.get({
           jar: request.jar(),
           followRedirect: false,
-          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8NAEIXvhf6HsPdNM2mtdWiDhSIEqgdbPHjbbqYazO7GnQ0Uf73bVDAKetnDm%2B%2FNm8cuWZmmxa17cV14pPeOOCQn01jGfrISnbfoFNeMVhliDBp36%2Fst5mmGrXfBadeIgeV%2Fh2ImH2pnRVJuVuJs8DLPM32dXZHUEB8AmsubhZpJ0sfZ4aBpNoVF5Jk7Ki0HZcNK5BnMJeQSpntYYAYI%2BbNInshzXB7HaSaK8ShJlucI7L2%2BeA2hZZxMjs4dlOeubZ0P6QfZivgt1c4sJ0P82%2F8Qi5Sb5M55o8LfDSGFXqkreexRJKPqZl1VnphFEXNv6aRM29Ag7bJ8kLaLcGxRxrNOBXxRP8Tx6KL%2B%2BrniEw%3D%3D&Signature=KH%2FBMO0DJyS2Ffy%2B6Rnb11pAF37Y%2Beua7RHcFhVrwgxJEqsx59vTelrfPt771JPfr7%2BoG1uYwwO3Algs59yTeqmU35x18Bf2e0yWugqEF7wxHETCjrwbCK1YjYg0ilwCojk%2FBTTv2Rs%2BY7RB21Ou1GShT1uXv8WItj7E2qnr%2B6kHY5XJWTJukZa9Vnkx%2FiisA7n6UfnnGcWMdltYeOvyHvOFMVG43dDxBms9WKMKdxn6NJ7i2V1v7nXj1DoXD4PDH5B6aevkA49c6mpzozyXKLeXLys%2FvPNNT4cC1jmWvuen5pe%2FE1WfgcZcZvj2GGaxs36fdH%2FHsIcyDvE%2Bj7ngYw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+          uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
           if(err) return done(err);
           // First it should come the LogoutRequest to the 2nd Session Participant as a redirect
@@ -240,7 +252,7 @@ describe('samlp logout with Session Participants', function () {
           request.get({
             jar: request.jar(),
             followRedirect: false,
-            uri: 'http://localhost:5050/logout?SAMLResponse=fZHBisJADIbvgu9Q5l47U23rBltY1ovgXlbx4GWZjnEV2skwmYKPv21F0IuXgSR%2F%2Fi%2FJrFi3jYMt%2FVEXfpAdWcbo1jaWYSyVovMWSPOVweoWGYKB3ef3FtKZBOcpkKFGTCdRtFmX4jeta52jzjAvitNSFmeZ63vVPuz3VIrB28dpKk0hM4yN6h%2BlMI8%2FlnoRozkv6trgYq6WY%2FMBPV%2FJlqKH3t2YO9xYDtqGPitVHqs0VvlezWFeQFYcR9kaOVytDmPvJQQHSdKQ0c2FOEAmM9mHw%2BqiGuRRtBoGg9HdP53h%2FRU0M%2FqBIaqBwT3kTFRrz51z5MMMb7p1Dc4MtavkifAMdbALOnRcvURfdMLooJsO34%2FAoxp2nTHILJKHc%2FJiPZ08Eq8fXv0D&Signature=TvghU9Ct8N5JXHaN3dG8oCeaBlJawQ9Tw9a6Qsx4qh%2FGh7fGfiLQBZOncyfXQdh7aKrjPUJ%2FENwlpB2mlUsOGD3z5Hq9tI2Z42nBXT8xnEXhTfF%2Frn259HWYZhxB4mSmOffhWUibkKYqvSomulwtQ%2FvX%2FY80GquccJXiwSyf4Y2QsKUfktuaoNX6vyD4W9CGWk0EWw1jWHPKxEDU8fXeNw4PUsNlP0%2BQZx6QcPqvXAtWQgawzw%2FwfeqBwjen%2BJjR4MPegB7rPS9D6XzZMzt9T5ApjUOiiCJ1agmSDGvQhqguP9UHzZDmO0M4p%2BwYnOtgQ0QRRaOlUIjhj48vFl%2FIXA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+            uri: 'http://localhost:5050/logout?SAMLResponse=fZLBasMwDIbvg71D8D2NnTZJZ5rAWC%2BF7rKWHnYZjquuBccylgN9%2FCWBQpKN6WAQv6RP%2FtGGVGOc3OM3tuEDyKEliO6NsSQHqWSttxIV3Uha1QDJoOXh9X0v0wWXzmNAjYY9P0Wj2G1L9pXWtcpBZZAXxXnNiwvP1bzOPpBHLFnP83Gacl3wDGItukcIyOOXtVrFoC%2BrutawWor1bMwJPN3QlqxbaU4gamFnKSgbOp2LPBZpLPKjWMplIbPic9awBQo3q8Iw7xqCk0liUCtzRQoy4xnv0t4sVk0bo2jTf0AORD%2By8H8HFRH4nsaqnkYd7oJYK0%2Btc%2BjDAu6qcQYWGptNMiL8jXfyEFRoqZpkb3iG6KRMC%2F8vQ0O1PLRaAxFLfjOSCWQsP6TpKVU%2F&Signature=taHlDQSc0bYUYw%2Bcekm8gt3Y4Pk%2BftEIo5dBXaAW5%2BpyNUW9lb85cvt7QkVchIfY8HH4wa8NbtO6CD1yFLMQrYKLpENW1p6NbkedimbrvaWyobSqccQff81cBe5EMN%2BYuFQetKZhmsdt1pINdsW3W068mZeL6AJgxaxI45UaZzD7Dit%2BmdLzo1p7AnNa1Fr14kFpr2dj94kP32layrMPrgFZpBa4h%2FxqVwKJJ5EXflqEturBrU1zISFY9A7cateqQF89yLX5MQ8wXKXwALBKT2MczPkjLqC8X0ejDgBwBAbeE31cM39Ri%2B20s4JfcCxPnT%2BUVTgPs2Q%2BTPgZVSBBlA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
           }, function (err, response) {
             if (err) { return done(err); }
 
@@ -317,6 +329,7 @@ describe('samlp logout with Session Participants', function () {
           nameID: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert
         });
       });
 
@@ -336,11 +349,11 @@ describe('samlp logout with Session Participants', function () {
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5CSFdCdTdVbkJsNUF5VHFONFBnZEJ5M3lQc3IvZ0VPNG1KT0xPNm01Rm1tM1FtaVlOR0FlSWdJOVVXbmpuTnErWDc4QWE0SWIxbFBxOEsrblM5cTZ6UjEwK0xWZmM4U2YwR3dhdTdXTVpFNmVhR29PbCtCYUEvOGxUR0pBbGpScjJyNGtjME90S2w4dnJub2M0a3RGdXNsVUVOaDBaUXRYSkJiaTgvaEFzM1dXQTVNYldvQXJuUHJHTjFwK2pvdGIzOHc5ZnhEbUVhdG5yUmdXZ3BQa21GWVJockY5dkpEREJMeTkzbS9XQXc1c3NKbVFoYVNoaldtRkx2OVBpQ0ZRd08yV1B5Zk1RV2U5K2U0VDdXb3d1Y1ZkT2FZWHk5dm54REdXS01wSDBGVnRjR2ZRV0pmUzEwcXlCSHNwY25TemNVbUMxaWFPM3g1RzM0bUJXOXRzK1E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
           }
         }, function (err, response){
-          if(err) return done(err);
+          if (err) { return done(err); }
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
           var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
@@ -376,7 +389,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: server.credentials.cert // SP1 public Cert
+        cert: sp1_credentials.cert // SP1 public Cert
       };
 
       var sessionParticipant2 = {
@@ -384,7 +397,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'bar@example.com',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: server.credentials.cert // SP2 public Cert
+        cert: sp2_credentials.cert // SP2 public Cert
       };
 
       before(function () {
@@ -400,20 +413,22 @@ describe('samlp logout with Session Participants', function () {
       //   <saml:SessionIndex>1</saml:SessionIndex>
       // </samlp:LogoutRequest>
       before(function (done) {
+        // Session Participant 1 initiating logout. Sending LogoutRequest to IdP
         request.post({
           jar: request.jar(),
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5CSFdCdTdVbkJsNUF5VHFONFBnZEJ5M3lQc3IvZ0VPNG1KT0xPNm01Rm1tM1FtaVlOR0FlSWdJOVVXbmpuTnErWDc4QWE0SWIxbFBxOEsrblM5cTZ6UjEwK0xWZmM4U2YwR3dhdTdXTVpFNmVhR29PbCtCYUEvOGxUR0pBbGpScjJyNGtjME90S2w4dnJub2M0a3RGdXNsVUVOaDBaUXRYSkJiaTgvaEFzM1dXQTVNYldvQXJuUHJHTjFwK2pvdGIzOHc5ZnhEbUVhdG5yUmdXZ3BQa21GWVJockY5dkpEREJMeTkzbS9XQXc1c3NKbVFoYVNoaldtRkx2OVBpQ0ZRd08yV1B5Zk1RV2U5K2U0VDdXb3d1Y1ZkT2FZWHk5dm54REdXS01wSDBGVnRjR2ZRV0pmUzEwcXlCSHNwY25TemNVbUMxaWFPM3g1RzM0bUJXOXRzK1E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
           }
         }, function (err, response){
           if(err) return done(err);
+          // The response contains an HTTP Form that will be submitted to Session Participant 2
+          // The Form includes a LogoutRequest signed by the IdP
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
-          // 
           SAMLRequest = $('input[name="SAMLRequest"]').attr('value');
           sessionParticipantLogoutRequestRelayState = $('input[name="RelayState"]').attr('value');
           sessionParticipantLogoutRequest = new Buffer(SAMLRequest, 'base64').toString();
@@ -437,10 +452,10 @@ describe('samlp logout with Session Participants', function () {
 
         // TODO: Review as we need to merge validation methods
         var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutRequest);        
-        expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "LOGOUT_REQUEST", doc, { signingCert: sessionParticipant1.cert })).to.be.undefined;
+        expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "LOGOUT_REQUEST", doc, { signingCert: server.credentials.cert })).to.be.undefined;
       });
 
-      describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
+      describe('should send Session Participant 2 LogoutResponse to the SAML IdP', function () {
         var SAMLResponse;
         var sessionParticipantLogoutResponse;
         var sessionParticipantLogoutResponseRelayState;
@@ -496,7 +511,7 @@ describe('samlp logout with Session Participants', function () {
           
           // TODO: Review as we need to merge validation methods          
           var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutResponse);                  
-          expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "LOGOUT_RESPONSE", doc, { signingCert: sessionParticipant2.cert })).to.be.undefined;
+          expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "LOGOUT_RESPONSE", doc, { signingCert: server.credentials.cert })).to.be.undefined;
         });
 
         it('should remove session from sessions array', function () {
@@ -516,6 +531,7 @@ describe('samlp logout with Session Participants', function () {
           nameID: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert
         });
       });
 
@@ -531,7 +547,7 @@ describe('samlp logout with Session Participants', function () {
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+YW4taXNzdWVyPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5kOGFWU2JyeVZydWhzLzVxWVp3ODlUdE43ZW5xaFppMHBobm1iWUdYdUdjPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5RYjlDZWtXQkR0L2hlaENRTnA3eDQvS21NNTNselFIMEk3MmUxNVFYaXJCcnluYkIybGpHWURHc1FrQUVaTmsyMEJobHpSZ3J3NWk1eityVlRmVUUzQUNtT2hOcUhPbjVwMXJiazJWbGh2NE9IWTRzUnVnQk54TjY1cDRaTEVFTDdudkQvd2Vzd2Jhd3lrdTlQSHNodE5uQnRhYXRtdmpmUlV1YXRJaVN0S3dnSlcwYnorNzBxcFNSS0p6UTNLOVF6emI0NlhoSWtDRkMyb2ZtbTB1MElkbWNqR2pSTklpL1h4VWVON2NCdS9zcnhxSWNpZlg2S1BQUXNNV0c5anQ0WitIbXR1RjRISTBxWStPeTZ3bjRLbldSN1BEUHJ3bTFEUmhLNllPc1hXUFR5OVM3YlFRckhITkt6S0ZQNTAzS2c3ZWg5NEIyQmJ6RUtQV21yU043N0E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4zPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InBmeGEwOWQ1MmZiLTZkODAtYjhlYS1jMWE2LTBhMzk5YjYxNjY4MSIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4NCiAgICAgICAgPHNhbWw6SXNzdWVyPmFuLWlzc3Vlcjwvc2FtbDpJc3N1ZXI+PGRzOlNpZ25hdHVyZSB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+DQogIDxkczpTaWduZWRJbmZvPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+DQogICAgPGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNyc2Etc2hhMSIvPg0KICA8ZHM6UmVmZXJlbmNlIFVSST0iI3BmeGEwOWQ1MmZiLTZkODAtYjhlYS1jMWE2LTBhMzk5YjYxNjY4MSI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIi8+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHM6VHJhbnNmb3Jtcz48ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3NoYTEiLz48ZHM6RGlnZXN0VmFsdWU+MGRlQ2ZxbFlhcVkxbGQ2YlVxcmpidHV3SUdVPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5nTSszUHBwREFGdk1YSnVoVnIvMTRqb1hRWS9wRjIyc1VzMks0VjNCSmpNa21vUU4xL0VVbENrTEc3NXhIdGs5MWd3OE1HNUpySEgyZkZ3V3lyYWxmSXZ5Q281WmQ2aS9SeHdRTlo0bkpncGxWRVRDd09LK3ByNk5QM3hhMHpqWEJld255OWlHZXI2OFQ2dUFVTVQweTZJTUpXbEZGYmhaRW1lWkJ3cE1rVWJjU2VsRHNzSFRvYUR4RFZBdmhOR3pTU1VKd1FyWkYvVjZDOFJkdFRVSUxvZXJzRTVzcktVQVJ5SjZzbWlKck9vVm4reHJOWDBCM0lvMjIyczZSV1d1VU9ibVVsQWRnUzYyb1VzSFV0LzBoSXlvMUJ4c2VMaDd4Nm1kVXY0M1BGTGJqWVZ6eXdTbElIenFEVW5udHV2c0ozTVhKREw4dEJvUFNlbXdPV1g4Z0E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+DQo8ZHM6S2V5SW5mbz48ZHM6WDUwOURhdGEvPjwvZHM6S2V5SW5mbz48L2RzOlNpZ25hdHVyZT4NCiAgICAgICAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPg0KICAgICAgICA8c2FtbDpTZXNzaW9uSW5kZXg+MTwvc2FtbDpTZXNzaW9uSW5kZXg+DQogICAgICA8L3NhbWxwOkxvZ291dFJlcXVlc3Q+',
             RelayState: '123'
           }
         }, function (err, response){
@@ -569,7 +585,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: server.credentials.cert // SP1 public Cert
+        cert: sp1_credentials.cert // SP1 public Cert
       };
 
       var sessionParticipant2 = {
@@ -577,7 +593,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'bar@example.com',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: server.credentials.cert // SP2 public Cert
+        cert: sp2_credentials.cert // SP2 public Cert
       };
 
       // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
@@ -598,7 +614,7 @@ describe('samlp logout with Session Participants', function () {
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5CSFdCdTdVbkJsNUF5VHFONFBnZEJ5M3lQc3IvZ0VPNG1KT0xPNm01Rm1tM1FtaVlOR0FlSWdJOVVXbmpuTnErWDc4QWE0SWIxbFBxOEsrblM5cTZ6UjEwK0xWZmM4U2YwR3dhdTdXTVpFNmVhR29PbCtCYUEvOGxUR0pBbGpScjJyNGtjME90S2w4dnJub2M0a3RGdXNsVUVOaDBaUXRYSkJiaTgvaEFzM1dXQTVNYldvQXJuUHJHTjFwK2pvdGIzOHc5ZnhEbUVhdG5yUmdXZ3BQa21GWVJockY5dkpEREJMeTkzbS9XQXc1c3NKbVFoYVNoaldtRkx2OVBpQ0ZRd08yV1B5Zk1RV2U5K2U0VDdXb3d1Y1ZkT2FZWHk5dm54REdXS01wSDBGVnRjR2ZRV0pmUzEwcXlCSHNwY25TemNVbUMxaWFPM3g1RzM0bUJXOXRzK1E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
           }
         }, function (err, response){
@@ -666,7 +682,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: server.credentials.cert // SP1 public Cert
+        cert: sp1_credentials.cert // SP1 public Cert
       };
 
       var sessionParticipant2 = {
@@ -674,7 +690,7 @@ describe('samlp logout with Session Participants', function () {
         nameID: 'bar@example.com',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: server.credentials.cert // SP2 public Cert
+        cert: sp2_credentials.cert // SP2 public Cert
       };
 
       // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
@@ -695,7 +711,7 @@ describe('samlp logout with Session Participants', function () {
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5CSFdCdTdVbkJsNUF5VHFONFBnZEJ5M3lQc3IvZ0VPNG1KT0xPNm01Rm1tM1FtaVlOR0FlSWdJOVVXbmpuTnErWDc4QWE0SWIxbFBxOEsrblM5cTZ6UjEwK0xWZmM4U2YwR3dhdTdXTVpFNmVhR29PbCtCYUEvOGxUR0pBbGpScjJyNGtjME90S2w4dnJub2M0a3RGdXNsVUVOaDBaUXRYSkJiaTgvaEFzM1dXQTVNYldvQXJuUHJHTjFwK2pvdGIzOHc5ZnhEbUVhdG5yUmdXZ3BQa21GWVJockY5dkpEREJMeTkzbS9XQXc1c3NKbVFoYVNoaldtRkx2OVBpQ0ZRd08yV1B5Zk1RV2U5K2U0VDdXb3d1Y1ZkT2FZWHk5dm54REdXS01wSDBGVnRjR2ZRV0pmUzEwcXlCSHNwY25TemNVbUMxaWFPM3g1RzM0bUJXOXRzK1E9PTwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgPHNhbWw6TmFtZUlEIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6ZW1haWxBZGRyZXNzIj5mb29AZXhhbXBsZS5jb208L3NhbWw6TmFtZUlEPgogIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
           }
         }, function (err, response){
