@@ -102,6 +102,13 @@ exports.getNameIdentifier = function(assertion) {
             .getElementsByTagName('saml:NameID')[0];
 };
 
+exports.getNameIdentifierFormat = function(assertion) {
+  var doc = new xmldom.DOMParser().parseFromString(assertion);
+  return doc.documentElement
+            .getElementsByTagName('NameID')[0]
+            .getAttribute('Format');
+};
+
 exports.getSubjectConfirmationData = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement.getElementsByTagName('saml:SubjectConfirmationData')[0];

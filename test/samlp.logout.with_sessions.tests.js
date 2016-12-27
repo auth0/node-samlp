@@ -85,7 +85,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert // SP1 public Cert
@@ -129,7 +129,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert // SP1 public Cert
@@ -186,7 +186,7 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameID: 'foo@example.com',
+        nameId: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
         cert: sp1_credentials.cert // SP1 public Cert
@@ -194,7 +194,7 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant2 = {
         serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameID: 'bar@example.com',
+        nameId: 'bar@example.com',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
         cert: sp2_credentials.cert // SP2 public Cert
@@ -251,7 +251,7 @@ describe('samlp logout with Session Participants', function () {
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameID);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
       });
 
@@ -371,7 +371,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
@@ -415,7 +415,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
@@ -464,7 +464,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
@@ -524,7 +524,7 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameID: 'foo@example.com',
+        nameId: 'foo@example.com',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
         cert: sp1_credentials.cert // SP1 public Cert
@@ -532,7 +532,8 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant2 = {
         serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameID: 'bar@example.com',
+        nameId: 'bar@example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
         cert: sp2_credentials.cert // SP2 public Cert
@@ -581,7 +582,8 @@ describe('samlp logout with Session Participants', function () {
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameID);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
+        expect(xmlhelper.getNameIdentifierFormat(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.nameIdFormat);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
       });
 
@@ -668,7 +670,8 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'an-issuer',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
+          nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',          
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
@@ -722,7 +725,8 @@ describe('samlp logout with Session Participants', function () {
     describe('SP initiated - 2 Session Participants - Partial Logout with Error on SP', function () {
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameID: 'foo@example.com',
+        nameId: 'foo@example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',        
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
         cert: sp1_credentials.cert // SP1 public Cert
@@ -730,7 +734,8 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant2 = {
         serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameID: 'bar@example.com',
+        nameId: 'bar@example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
         cert: sp2_credentials.cert // SP2 public Cert
@@ -821,7 +826,8 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant1 = { // Logout Initiator
         serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameID: 'foo@example.com',
+        nameId: 'foo@example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
         sessionIndex: '1',
         serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
         cert: sp1_credentials.cert // SP1 public Cert
@@ -829,7 +835,8 @@ describe('samlp logout with Session Participants', function () {
 
       var sessionParticipant2 = {
         serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameID: 'bar@example.com',
+        nameId: 'bar@example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
         sessionIndex: '2',
         serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
         cert: sp2_credentials.cert // SP2 public Cert
@@ -919,7 +926,7 @@ describe('samlp logout with Session Participants', function () {
         sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameID: 'foo@example.com',
+          nameId: 'foo@example.com',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
