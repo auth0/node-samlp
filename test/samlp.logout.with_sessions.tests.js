@@ -75,13 +75,58 @@ describe('samlp logout with Session Participants', function () {
     });
   });
 
-  describe('HTTP Redirect', function(){
+  describe('HTTP Redirect', function () {
+    describe('SP initiated - Should fail if No Issuer is present', function () {
+      var logoutResultValue;
+
+      before(function () {
+        testStore.clear();
+
+        sessions.splice(0);
+        sessions.push({
+          serviceProviderId : 'https://foobarsupport.zendesk.com',
+          nameID: 'foo@example.com',
+          sessionIndex: '1',
+          serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert // SP1 public Cert
+        });
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+      //   <saml:SessionIndex>1</saml:SessionIndex>
+      // </samlp:LogoutRequest>
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8QwEIXvgv%2Bh5J6a6da1hra4sAiF1YMrHrxl06kUmqRmUujPN1tXWBWdwxzmvW%2FmwZSkzDDKnXtzU3jC9wkpJLMZLMlFqdjkrXSKepJWGSQZtNxvHnYyS4UcvQtOu4GdIf8Tigh96J1lSbOt2BHwPMuEvhHXyDXEBoBrfluonKPu8sNBY76CIvqJJmwsBWVDxTIBaw4Zh9UzFFKAhOyVJS%2FoKS6PcipYfXmRnKo8HpKPMU6zTe6dNyr8nRNSWCZ9y7vFKtGofti0rUciVnfO3eGszDhgqp0pr86W%2F7q5j0hM1NgW5xpO3m%2FDL%2BJT%2B%2FGL%2BgM%3D&Signature=CUwze47fZpFBtD7YRGyAzRyTrK7l8pxsg%2BiUan8N%2FVPAOOVYXcNElksrYrpZLPSAVhZbWlQYLJjuYxicY%2FVIG%2FiGjoNlPUMiAGsb4vfBumgDeShns22fdSYZ27hF0NL3%2FI%2FcUThvz4wCwcFb6XTmY101Wbew3gLVdBcsx17YwIns52TNmMjG0wsW9KtGZ4jrrZ1kGJ0rsDf5BL4jBIT5KgZYF2u4xOo2v6ysUPf3lG4ALRWqJFdAdkOVJ%2BdUO%2B47n57G4q1YcFDwoL%2BTM%2B02qXV1QwiTyMXttQI25DX4%2BEru2rAA7LN9F3KPabINu4vV%2FF9TAU2DBHCFNArcRDa%2FsA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+        }, function (err, response){
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(400);
+          logoutResultValue = response.body;
+
+          done();
+        });
+      });
+
+      it('should respond with an Error message', function () {
+        expect(logoutResultValue).to.equal('SAML Request with no issuer. Issuer is a mandatory element.');
+      });
+    });
+
     describe('SP initiated - 1 Session Participant', function () {
       var logoutResultValue;
 
       before(function () {
         testStore.clear();
 
+        sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
           nameID: 'foo@example.com',
@@ -158,6 +203,7 @@ describe('samlp logout with Session Participants', function () {
       before(function () {
         testStore.clear();
 
+        sessions.splice(0);
         sessions.push(sessionParticipant1);
         sessions.push(sessionParticipant2);
       });
@@ -317,13 +363,63 @@ describe('samlp logout with Session Participants', function () {
     });
   });
 
-  describe('HTTP POST', function(){
+  describe('HTTP POST', function () {
+    describe('SP initiated - Should fail if No Issuer is present', function () {
+      var logoutResultValue;
+
+      before(function () {
+        testStore.clear();
+
+        sessions.splice(0);
+        sessions.push({
+          serviceProviderId : 'https://foobarsupport.zendesk.com',
+          nameID: 'foo@example.com',
+          sessionIndex: '1',
+          serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert
+        });
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+      //   <saml:SessionIndex>1</saml:SessionIndex>
+      // </samlp:LogoutRequest>
+      before(function (done) {
+        request.post({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout',
+          json: true,
+          body: {
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InBmeDRjNTk4YmRhLWQ0ZWYtNTdkOC04NDM1LTk1ZmNmYzE4Y2I0NyIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NGM1OThiZGEtZDRlZi01N2Q4LTg0MzUtOTVmY2ZjMThjYjQ3Ij48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT5oakVEWXBPeU96SnBlMzZkcUFLUFRFMENFYXc9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPmU4TDJOeEx4RjJwMjYrU0NUZnQyMnNja2F1emk5aXlHNTNwRkgvaFlqUEZ5SFU2eTRjcjN0bnFzZklzWHlTR0xwaHUvam9nMWRTVVRFMWpxV0s3U0pZeVJFK1hOM1pwb2I0cDQ3eFAxZGZveFhSd2lNQXRab1hWaWpFYXp1QmxteEZCRjV5dTl6cnFMcFlsY1lRMWRSdmY5dkp0bzVHOXNES3VaeXZFNkVxNG8rZDRPNW9iUmxpWDE5dGovMEFIUzNtcHJOR0QwVlYvU3BhUzVXMzZqMEM3aW4zNG5JRHpBdUc2RUJXVkp1SllzQXp3R0wwOVV6TlhzVTNuMVZIaHhaeUN5Zlo2TEJFNFJvc3ZvaTNiZzZ5cE56dXVFek82bGxndlFRRnFiS1h4NmpGT2I2WU1LWXRMdytobWMyZUlmazBvOUVaSzBUaTlMYU93M09oSU5rUT09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
+            RelayState: '123'
+          }
+        }, function (err, response){
+          if (err) { return done(err); }
+          expect(response.statusCode).to.equal(400);
+          logoutResultValue = response.body;
+
+          done();
+        });
+      });
+
+      it('should respond with an Error message', function () {
+        expect(logoutResultValue).to.equal('SAML Request with no issuer. Issuer is a mandatory element.');
+      });
+    });
+
     describe('SP initiated - 1 Session Participant', function () {
       var logoutResultValue, relayState, samlResponse;
 
       before(function () {
         testStore.clear();
 
+        sessions.splice(0);
         sessions.push({
           serviceProviderId : 'https://foobarsupport.zendesk.com',
           nameID: 'foo@example.com',
@@ -403,6 +499,7 @@ describe('samlp logout with Session Participants', function () {
       before(function () {
         testStore.clear();
 
+        sessions.splice(0);
         sessions.push(sessionParticipant1);
         sessions.push(sessionParticipant2);
       });
@@ -526,6 +623,7 @@ describe('samlp logout with Session Participants', function () {
       before(function () {
         testStore.clear();
 
+        sessions.splice(0);
         sessions.push({
           serviceProviderId : 'an-issuer',
           nameID: 'foo@example.com',
@@ -603,6 +701,8 @@ describe('samlp logout with Session Participants', function () {
       // </samlp:LogoutRequest>
       before(function (done) {
         testStore.clear();
+
+        sessions.splice(0);
         // Two sessions in the IdP
         sessions.push(sessionParticipant1);
         sessions.push(sessionParticipant2);
@@ -702,6 +802,7 @@ describe('samlp logout with Session Participants', function () {
         testStore.clear();
         returnError = true;
 
+        sessions.splice(0);
         sessions.push(sessionParticipant1);
         sessions.push(sessionParticipant2);
 
