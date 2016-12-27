@@ -47,6 +47,12 @@ exports.getDestination = function(response) {
   return destination;
 };
 
+exports.getInResponseTo = function(response) {
+  var doc = new xmldom.DOMParser().parseFromString(response);
+  var destination = doc.documentElement.getAttribute('InResponseTo');
+  return destination;
+};
+
 exports.getSignatureMethodAlgorithm = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement

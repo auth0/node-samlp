@@ -280,8 +280,8 @@ describe('samlp logout with Session Participants', function () {
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
-          // TODO: expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
-          // TODO: InResponseTo
+          expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
+          expect(xmlhelper.getInResponseTo(sessionParticipantLogoutResponse)).to.equal('samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318');
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
         });
 
@@ -493,8 +493,8 @@ describe('samlp logout with Session Participants', function () {
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
-          // TODO: expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
-          // TODO: InResponseTo
+          expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
+          expect(xmlhelper.getInResponseTo(sessionParticipantLogoutResponse)).to.equal('pfx6fe657e3-1a7f-893e-f690-f7fc5162ea11');
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
         });
 

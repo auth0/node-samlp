@@ -143,7 +143,7 @@ describe.skip('samlp logout', function () {
         });
       });
 
-      it('should return invalid signture error', function(){
+      it('should return invalid signature error', function(){
         expect(response.statusCode).to.equal(400);
         // TODO: Improve this error message
         expect(response.body).to.equal('Signature check errors: invalid signature: the signature value asidjpasjdpasjndoubvuojewprjweprj is incorrect');
