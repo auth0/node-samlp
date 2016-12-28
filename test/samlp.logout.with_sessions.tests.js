@@ -21,6 +21,24 @@ var sp2_credentials = {
   key:      fs.readFileSync(path.join(__dirname, 'fixture', 'sp2.key')),
 };
 
+var sessionParticipant1 = {
+  serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
+  nameId: 'foo@example.com',
+  nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+  sessionIndex: '1',
+  serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
+  cert: sp1_credentials.cert // SP1 public Cert
+};
+
+var sessionParticipant2 = {
+  serviceProviderId : 'https://foobarsupport.example.com', // Issuer
+  nameId: 'bar@example.com',
+  nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+  sessionIndex: '2',
+  serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
+  cert: sp2_credentials.cert // SP2 public Cert
+};
+
 describe('samlp logout with Session Participants', function () {
   var sessions = [], failed, returnError;
   var samlIdPIssuer = 'urn:fixture-test';
@@ -127,13 +145,7 @@ describe('samlp logout with Session Participants', function () {
         testStore.clear();
 
         sessions.splice(0);
-        sessions.push({
-          serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameId: 'foo@example.com',
-          sessionIndex: '1',
-          serviceProviderLogoutURL: 'https://example.com/logout',
-          cert: sp1_credentials.cert // SP1 public Cert
-        });
+        sessions.push(sessionParticipant1);
       });
 
       // SAMLRequest: base64 encoded + deflated + URLEncoded
@@ -183,22 +195,6 @@ describe('samlp logout with Session Participants', function () {
       var sessionParticipantLogoutRequestRelayState;
       var sessionParticipantLogoutRequestSigAlg;
       var sessionParticipantLogoutRequestSignature;
-
-      var sessionParticipant1 = { // Logout Initiator
-        serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameId: 'foo@example.com',
-        sessionIndex: '1',
-        serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: sp1_credentials.cert // SP1 public Cert
-      };
-
-      var sessionParticipant2 = {
-        serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameId: 'bar@example.com',
-        sessionIndex: '2',
-        serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: sp2_credentials.cert // SP2 public Cert
-      };
 
       before(function () {
         testStore.clear();
@@ -369,14 +365,9 @@ describe('samlp logout with Session Participants', function () {
         testStore.clear();
 
         sessions.splice(0);
-        sessions.push({
-          serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameId: 'foo@example.com',
-          sessionIndex: '1',
-          serviceProviderLogoutURL: 'https://example.com/logout',
-          cert: sp1_credentials.cert
-        });
+        sessions.push(sessionParticipant1);
       });
+
       // SAMLRequest: base64 encoded + deflated + URLEncoded
       // Signature: URLEncoded
       // SigAlg: URLEncoded
@@ -403,6 +394,246 @@ describe('samlp logout with Session Participants', function () {
         expect(response.body).to.equal('Signature check errors: The signature provided (asidjpasjdpasjndoubvuojewprjweprj) does not match the one calculated');
       });
     });
+
+    // IdP Initiated with no Session Participants should not happen
+    // At least we should have 1 session participant. Still should not return an error
+    describe('IdP initiated - No Session Participants', function () {
+      var body;
+
+      before(function () {
+        testStore.clear();
+        sessions.splice(0);
+      });
+
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout'
+        }, function (err, response) {
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(200);
+          body = response.body;
+
+          done();
+        });
+      });
+
+      it('should respond with a Success value', function () {
+        expect(body).to.equal('OK');
+      });
+    });
+
+    describe('IdP initiated - 1 Session Participant', function () {
+      var SAMLRequest;
+      var sessionParticipantLogoutRequest;
+      var sessionParticipantLogoutRequestSigAlg;
+      var sessionParticipantLogoutRequestSignature;
+
+      before(function () {
+        testStore.clear();
+
+        sessions.splice(0);
+        sessions.push(sessionParticipant1);
+      });
+
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout'
+        }, function (err, response) {
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(302);
+
+          var i = response.headers.location.indexOf('?');
+          var completeQueryString = response.headers.location.substr(i+1);
+          var parsedQueryString = qs.parse(completeQueryString);
+
+          SAMLRequest = parsedQueryString.SAMLRequest;
+          sessionParticipantLogoutRequestSigAlg = parsedQueryString.SigAlg;
+          sessionParticipantLogoutRequestSignature = parsedQueryString.Signature;
+
+          zlib.inflateRaw(new Buffer(SAMLRequest, 'base64'), function (err, decodedAndInflated) {
+            if(err) return done(err);
+            sessionParticipantLogoutRequest = decodedAndInflated.toString();
+
+            done();
+          });
+        });
+      });
+
+      it('should validate LogoutRequest to Session Participant', function () {
+        expect(sessionParticipantLogoutRequest).to.exist;
+        expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
+        expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant1.nameId);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant1.sessionIndex);
+      });
+
+      it('should validate LogoutRequest signature', function () {
+        expect(SAMLRequest).to.exist;
+        expect(sessionParticipantLogoutRequestSigAlg).to.exist;
+        expect(sessionParticipantLogoutRequestSignature).to.exist;
+
+        var params =  {
+          query: {
+            SAMLRequest: SAMLRequest,
+            SigAlg: sessionParticipantLogoutRequestSigAlg,
+            Signature: sessionParticipantLogoutRequestSignature
+          }
+        }; 
+
+        expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
+      });
+    });
+
+    describe('IdP initiated - 2 Session Participant', function () {
+      var SAMLRequest;
+      var sessionParticipantLogoutRequest;
+      var sessionParticipantLogoutRequestSigAlg;
+      var sessionParticipantLogoutRequestSignature;
+
+      before(function () {
+        testStore.clear();
+
+        sessions.splice(0);
+        sessions.push(sessionParticipant1);
+        sessions.push(sessionParticipant2);
+      });
+
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout'
+        }, function (err, response) {
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(302);
+
+          var i = response.headers.location.indexOf('?');
+          var completeQueryString = response.headers.location.substr(i+1);
+          var parsedQueryString = qs.parse(completeQueryString);
+
+          SAMLRequest = parsedQueryString.SAMLRequest;
+          sessionParticipantLogoutRequestSigAlg = parsedQueryString.SigAlg;
+          sessionParticipantLogoutRequestSignature = parsedQueryString.Signature;
+
+          zlib.inflateRaw(new Buffer(SAMLRequest, 'base64'), function (err, decodedAndInflated) {
+            if(err) return done(err);
+            sessionParticipantLogoutRequest = decodedAndInflated.toString();
+
+            done();
+          });
+        });
+      });
+
+      it('should validate LogoutRequest to Session Participant', function () {
+        expect(sessionParticipantLogoutRequest).to.exist;
+        expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
+        expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant1.nameId);
+        expect(xmlhelper.getNameIdentifierFormat(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.nameIdFormat);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant1.sessionIndex);
+      });
+
+      it('should validate LogoutRequest signature', function () {
+        expect(SAMLRequest).to.exist;
+        expect(sessionParticipantLogoutRequestSigAlg).to.exist;
+        expect(sessionParticipantLogoutRequestSignature).to.exist;
+
+        var params =  {
+          query: {
+            SAMLRequest: SAMLRequest,
+            SigAlg: sessionParticipantLogoutRequestSigAlg,
+            Signature: sessionParticipantLogoutRequestSignature
+          }
+        }; 
+
+        expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
+      });
+
+      describe('should send Session Participant 1 LogoutResponse to the SAML IdP', function () {
+        var SAMLRequest2;
+        var sessionParticipant2LogoutRequest;
+        var sessionParticipant2LogoutRequestRelayState;
+        var sessionParticipant2LogoutRequestSigAlg;
+        var sessionParticipant2LogoutRequestSignature;
+
+        before(function (done) {
+          // SAMLResponse: base64 encoded + deflated + URLEncoded
+          // Signature: URLEncoded
+          // SigAlg: URLEncoded
+          // 
+          // <samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+          //   ID="_2bba6ea5e677d807f06a"
+          //   InResponseTo="_73dda80c6c1262377f52"
+          //   Version="2.0"
+          //   IssueInstant="2016-12-28T13:14:14Z"
+          //   Destination="http://localhost:5050/logout">
+          //     <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://foobarsupport.zendesk.com</saml:Issuer>
+          //     <samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+          //     </samlp:Status>
+          // </samlp:LogoutResponse>
+          request.get({
+            jar: request.jar(),
+            followRedirect: false,
+            uri: 'http://localhost:5050/logout?SAMLResponse=fZJBa8MwDIXvg%2F2H4Hsbx12SItrAWC%2BF7rKWHnYZrqOuZYllIhvGfv2SQCHJRoUu4unpMw%2BvWNeVgx19UvBvyI4sY%2FRdV5ahl9YiNBZI85XB6hoZvIH98%2BsO1FyCa8iToUo8PkSD2m7W4kOdTjpDnWKW5%2BVS5meZ6emevSEP1DryRVnqpTSZSVSmFnl%2BTtXEccSGr2TXoqVPjzEH3Fr22vpWl0k2S9RMLQ%2FJApKntt8nhg2yv1rt%2B3sX7x3EcUVGVxdiD6lMZTt2uYhibIyiVZcN9MRmkNb9sDQzNh1NFB2NW9yZ6KQbDs5R4%2Bc%2FaEvkr7mhehUPCP%2FjHey99oGL0fRCJUZHXQW8%2Fxjut2EfjEFmEf9lxCPIUL5J419T%2FAI%3D&Signature=Kgn5XbPJr26o5Nt3xWmsBi4b2lpz8wBnMXuMDAXUGHH%2B7jJcvHd2qL0O3j3drVzzZQ7aGde4Z%2FISi4p4nWHQFhvdHie7A3TM5u527gEzWMachI7PoOvNu9U1oXcOxt9srz2vHEmdCkDCUtwpkk%2FqkDiL10SHzSKIox8r6KdVrHhkI0Zm%2FUpyQeetLu6LLHE6mlmntQwktSmgyUXbru3kZbd16MhlR5xoJ4Rn9ZVDqfHx0kEKLk3NLILhUlxq%2BFKYlrP1WPGYNEnSv9tqT3rV8YOP0lKe4INP5THP9zT5iKVFhzq4wiOorhnXTVJ6m7ctH9MQgYXcGG3UzSIAqpVAWA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+          }, function (err, response) {
+            if (err) { return done(err); }
+            expect(response.statusCode).to.equal(302);
+
+            var i = response.headers.location.indexOf('?');
+            var completeQueryString = response.headers.location.substr(i+1);
+            var parsedQueryString = qs.parse(completeQueryString);
+
+            SAMLRequest2 = parsedQueryString.SAMLRequest;
+            sessionParticipant2LogoutRequestRelayState = parsedQueryString.RelayState;
+            sessionParticipant2LogoutRequestSigAlg = parsedQueryString.SigAlg;
+            sessionParticipant2LogoutRequestSignature = parsedQueryString.Signature;
+
+            zlib.inflateRaw(new Buffer(SAMLRequest2, 'base64'), function (err, decodedAndInflated) {
+              if(err) return done(err);
+              sessionParticipant2LogoutRequest = decodedAndInflated.toString();
+
+              done();
+            });
+          });
+        });
+
+        it('should validate LogoutRequest to Session Participant 2', function () {
+          expect(sessionParticipant2LogoutRequest).to.exist;
+          expect(xmlhelper.getIssueInstant(sessionParticipant2LogoutRequest)).to.exist;
+          expect(xmlhelper.getDestination(sessionParticipant2LogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
+          expect(xmlhelper.getConsent(sessionParticipant2LogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
+          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
+          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
+          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
+        });
+
+        it('should validate LogoutRequest signature', function () {
+          expect(SAMLRequest2).to.exist;
+          expect(sessionParticipant2LogoutRequestRelayState).to.exist;
+          expect(sessionParticipant2LogoutRequestSigAlg).to.exist;
+          expect(sessionParticipant2LogoutRequestSignature).to.exist;
+
+          var params =  {
+            query: {
+              SAMLRequest: SAMLRequest2,
+              RelayState: sessionParticipant2LogoutRequestRelayState,
+              SigAlg: sessionParticipant2LogoutRequestSigAlg,
+              Signature: sessionParticipant2LogoutRequestSignature
+            }
+          }; 
+
+          expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipant2LogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
+        });
+      });
+    });
   });
 
   describe('HTTP POST', function () {
@@ -413,13 +644,7 @@ describe('samlp logout with Session Participants', function () {
         testStore.clear();
 
         sessions.splice(0);
-        sessions.push({
-          serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameId: 'foo@example.com',
-          sessionIndex: '1',
-          serviceProviderLogoutURL: 'https://example.com/logout',
-          cert: sp1_credentials.cert
-        });
+        sessions.push(sessionParticipant1);
       });
 
       // SAMLRequest: base64 encoded + deflated + URLEncoded
@@ -462,13 +687,7 @@ describe('samlp logout with Session Participants', function () {
         testStore.clear();
 
         sessions.splice(0);
-        sessions.push({
-          serviceProviderId : 'https://foobarsupport.zendesk.com',
-          nameId: 'foo@example.com',
-          sessionIndex: '1',
-          serviceProviderLogoutURL: 'https://example.com/logout',
-          cert: sp1_credentials.cert
-        });
+        sessions.push(sessionParticipant1);
       });
 
       // SAMLRequest: base64 encoded + deflated + URLEncoded
@@ -521,23 +740,6 @@ describe('samlp logout with Session Participants', function () {
       var SAMLRequest;
       var sessionParticipantLogoutRequest;
       var sessionParticipantLogoutRequestRelayState;
-
-      var sessionParticipant1 = { // Logout Initiator
-        serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameId: 'foo@example.com',
-        sessionIndex: '1',
-        serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: sp1_credentials.cert // SP1 public Cert
-      };
-
-      var sessionParticipant2 = {
-        serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameId: 'bar@example.com',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-        sessionIndex: '2',
-        serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: sp2_credentials.cert // SP2 public Cert
-      };
 
       before(function () {
         testStore.clear();
@@ -661,7 +863,7 @@ describe('samlp logout with Session Participants', function () {
       });
     });
 
-    describe('SP Initiated - HTTP POST - with Issuer not an URL', function(){
+    describe('SP Initiated - With Issuer not an URL', function(){
       var samlResponse, action, relayState, logoutResultValue;
 
       before(function () {
@@ -723,24 +925,6 @@ describe('samlp logout with Session Participants', function () {
     });
 
     describe('SP initiated - 2 Session Participants - Partial Logout with Error on SP', function () {
-      var sessionParticipant1 = { // Logout Initiator
-        serviceProviderId : 'https://foobarsupport.zendesk.com', // Issuer
-        nameId: 'foo@example.com',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',        
-        sessionIndex: '1',
-        serviceProviderLogoutURL: 'https://foobarsupport.zendesk.com/logout',
-        cert: sp1_credentials.cert // SP1 public Cert
-      };
-
-      var sessionParticipant2 = {
-        serviceProviderId : 'https://foobarsupport.example.com', // Issuer
-        nameId: 'bar@example.com',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-        sessionIndex: '2',
-        serviceProviderLogoutURL: 'https://foobarsupport.example.com/logout',
-        cert: sp2_credentials.cert // SP2 public Cert
-      };
-
       // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
       //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
       //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
@@ -957,31 +1141,7 @@ describe('samlp logout with Session Participants', function () {
         expect(response.body).to.equal('Signature check errors: invalid signature: the signature value asidjpasjdpasjndoubvuojewprjweprj is incorrect');
       });
     });
-  });
 
-  // IdP Initiated with no Session Participants should not happen
-  // At least we should have 1 session participant. Still should not return an error
-  describe('IdP initiated', function () {
-    var body;
-    before(function (done) {
-      testStore.clear();
-      sessions.splice(0);
-
-      request.get({
-        jar: request.jar(),
-        followRedirect: false,
-        uri: 'http://localhost:5050/logout'
-      }, function (err, response) {
-        if(err) return done(err);
-        expect(response.statusCode).to.equal(200);
-        body = response.body;
-
-        done();
-      });
-    });
-
-    it('should respond with a Success value', function () {
-      expect(body).to.equal('OK');
-    });
+    //TODO IdP initiated with 1 and 2 SP configured with POST binding
   });
 });
