@@ -39,8 +39,8 @@ var sessionParticipant2 = {
   cert: sp2_credentials.cert // SP2 public Cert
 };
 
-describe('samlp logout with Session Participants', function () {
-  var sessions = [], failed, returnError;
+describe('samlp logout with Session Participants - Custom Provider', function () {
+  var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
   var testStore = new InMemoryStore();
 
@@ -58,12 +58,6 @@ describe('samlp logout with Session Participants', function () {
             cb(new Error('There was an error cleaning session'));
           }
           cb();
-        },
-        setLogoutStatusFailed: function(){
-          failed = true;
-        },
-        isLogoutFailed: function(){
-          return failed;
         }
       }
     },done);
@@ -139,7 +133,7 @@ describe('samlp logout with Session Participants', function () {
     });
 
     describe('SP initiated - 1 Session Participant', function () {
-      var logoutResultValue;
+      var logoutResultValue, RelayState;
 
       before(function () {
         testStore.clear();
@@ -167,7 +161,9 @@ describe('samlp logout with Session Participants', function () {
           expect(response.statusCode).to.equal(302);
           var qs = require('querystring');
           var i = response.headers.location.indexOf('SAMLResponse=');
-          var SAMLResponse = qs.parse(response.headers.location.substr(i)).SAMLResponse;
+          var query = qs.parse(response.headers.location.substr(i));
+          var SAMLResponse = query.SAMLResponse;
+          RelayState = query.RelayState
           
           zlib.inflateRaw(new Buffer(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
             if(err) return done(err);
@@ -182,6 +178,10 @@ describe('samlp logout with Session Participants', function () {
 
       it('should respond with a Success value', function () {
         expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+      });
+
+      it('should return the corresponding RelayState', function () {
+        expect(RelayState).to.equal('123');
       });
 
       it('should remove session from sessions array', function () {
@@ -215,7 +215,6 @@ describe('samlp logout with Session Participants', function () {
       // </samlp:LogoutRequest>
       before(function (done) {
         request.get({
-          jar: request.jar(),
           followRedirect: false,
           uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
@@ -257,7 +256,7 @@ describe('samlp logout with Session Participants', function () {
         expect(sessionParticipantLogoutRequestSigAlg).to.exist;
         expect(sessionParticipantLogoutRequestSignature).to.exist;
 
-        var params =  {
+        var params = {
           query: {
             SAMLRequest: SAMLRequest,
             RelayState: sessionParticipantLogoutRequestRelayState,
@@ -292,7 +291,6 @@ describe('samlp logout with Session Participants', function () {
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.get({
-            jar: request.jar(),
             followRedirect: false,
             uri: 'http://localhost:5050/logout?SAMLResponse=fZLBasMwDIbvg71D8D2NnTZJZ5rAWC%2BF7rKWHnYZjquuBccylgN9%2FCWBQpKN6WAQv6RP%2FtGGVGOc3OM3tuEDyKEliO6NsSQHqWSttxIV3Uha1QDJoOXh9X0v0wWXzmNAjYY9P0Wj2G1L9pXWtcpBZZAXxXnNiwvP1bzOPpBHLFnP83Gacl3wDGItukcIyOOXtVrFoC%2BrutawWor1bMwJPN3QlqxbaU4gamFnKSgbOp2LPBZpLPKjWMplIbPic9awBQo3q8Iw7xqCk0liUCtzRQoy4xnv0t4sVk0bo2jTf0AORD%2By8H8HFRH4nsaqnkYd7oJYK0%2Btc%2BjDAu6qcQYWGptNMiL8jXfyEFRoqZpkb3iG6KRMC%2F8vQ0O1PLRaAxFLfjOSCWQsP6TpKVU%2F&Signature=taHlDQSc0bYUYw%2Bcekm8gt3Y4Pk%2BftEIo5dBXaAW5%2BpyNUW9lb85cvt7QkVchIfY8HH4wa8NbtO6CD1yFLMQrYKLpENW1p6NbkedimbrvaWyobSqccQff81cBe5EMN%2BYuFQetKZhmsdt1pINdsW3W068mZeL6AJgxaxI45UaZzD7Dit%2BmdLzo1p7AnNa1Fr14kFpr2dj94kP32layrMPrgFZpBa4h%2FxqVwKJJ5EXflqEturBrU1zISFY9A7cateqQF89yLX5MQ8wXKXwALBKT2MczPkjLqC8X0ejDgBwBAbeE31cM39Ri%2B20s4JfcCxPnT%2BUVTgPs2Q%2BTPgZVSBBlA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
           }, function (err, response) {
@@ -511,6 +509,7 @@ describe('samlp logout with Session Participants', function () {
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
           if(err) return done(err);
+          
           expect(response.statusCode).to.equal(302);
 
           var i = response.headers.location.indexOf('?');
@@ -620,7 +619,6 @@ describe('samlp logout with Session Participants', function () {
           expect(sessionParticipant2LogoutRequestRelayState).to.exist;
           expect(sessionParticipant2LogoutRequestSigAlg).to.exist;
           expect(sessionParticipant2LogoutRequestSignature).to.exist;
-
           var params =  {
             query: {
               SAMLRequest: SAMLRequest2,

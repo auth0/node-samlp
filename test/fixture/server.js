@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var expressSession = require('express-session');
 var http = require('http');
 var samlp = require('../../lib');
 var xtend = require('xtend');
@@ -45,6 +46,8 @@ module.exports.start = function(options, callback){
       req.user = fakeUser;
       next();
     });
+
+    this.use(expressSession({secret:'somesecrettokenhere'}));
   });
 
   function getPostURL (wtrealm, wreply, req, callback) {
