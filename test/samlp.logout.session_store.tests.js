@@ -48,14 +48,17 @@ describe('samlp logout with Session Participants - Session Provider', function (
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       issuer: samlIdPIssuer,
       sloEnabled: true,
-      sessionHandler: {
-        getActiveSessions: function (cb) {
+      clearIdPSession: function(cb){
+        if (returnError){
+          cb(new Error('There was an error cleaning session'));
+        }
+        cb();
+      },
+      sessionParticipants: {
+        getAll: function (cb) {
           cb(null, sessions);
         },
-        clearIdPSession: function(cb){
-          if (returnError){
-            cb(new Error('There was an error cleaning session'));
-          }
+        remove: function(iss, cb){
           cb();
         }
       }
