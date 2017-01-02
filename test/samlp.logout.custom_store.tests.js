@@ -8,6 +8,7 @@ var zlib          = require('zlib');
 var utils         = require('../lib/utils');
 var qs            = require('querystring');
 var InMemoryStore = require('../lib/store/in_memory_store');
+var SPs           = require('../lib/sessionParticipants');
 var fs            = require('fs');
 var path          = require('path');
 
@@ -55,14 +56,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         }
         cb();
       },
-      sessionParticipants: {
-        getAll: function (cb) {
-          cb(null, sessions);
-        },
-        remove: function(iss, cb){
-          cb();
-        }
-      }
+      sessionParticipants: new SPs(sessions)
     },done);
   });
 

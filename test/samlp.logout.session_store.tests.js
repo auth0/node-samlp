@@ -10,6 +10,7 @@ var qs            = require('querystring');
 var signers       = require('../lib/signers');
 var fs            = require('fs');
 var path          = require('path');
+var SPs           = require('../lib/sessionParticipants');
 
 var sp1_credentials = {
   cert:     fs.readFileSync(path.join(__dirname, 'fixture', 'sp1.pem')),
@@ -54,14 +55,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         }
         cb();
       },
-      sessionParticipants: {
-        getAll: function (cb) {
-          cb(null, sessions);
-        },
-        remove: function(iss, cb){
-          cb();
-        }
-      }
+      sessionParticipants: new SPs(sessions)
     },done);
   });
 
