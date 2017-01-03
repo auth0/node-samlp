@@ -48,7 +48,6 @@ describe('samlp logout with Session Participants - Session Provider', function (
     server.start( { 
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       issuer: samlIdPIssuer,
-      sloEnabled: true,
       clearIdPSession: function(cb){
         if (returnError){
           cb(new Error('There was an error cleaning session'));
