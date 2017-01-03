@@ -77,37 +77,31 @@ module.exports.start = function(options, callback){
   }));
 
   app.get('/logout', function(req, res, next) {
-    getPostURL({}, {}, req, function (err, url) {
-      samlp.logout(xtend({}, {
-        deflate:            true,
-        issuer:             'urn:fixture-test',
-        protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-        cert:               credentials.cert,
-        key:                credentials.key,
-        destination:        url,
-      }, module.exports.options))(req, res, function (err) {
-        if (err) {
-          return res.send(400, err.message);
-        } 
-        next();
-      });
+    samlp.logout(xtend({}, {
+      deflate:            true,
+      issuer:             'urn:fixture-test',
+      protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+      cert:               credentials.cert,
+      key:                credentials.key
+    }, module.exports.options))(req, res, function (err) {
+      if (err) {
+        return res.send(400, err.message);
+      } 
+      next();
     });
   });
 
   app.post('/logout', function(req, res, next) {
-    getPostURL({}, {}, req, function (err, url) {
-      samlp.logout(xtend({}, {
-        issuer:             'urn:fixture-test',
-        protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
-        cert:               credentials.cert,
-        key:                credentials.key,
-        destination:        url,
-      }, module.exports.options))(req, res, function (err) {
-        if (err) {
-          return res.send(400, err.message);
-        } 
-        next();
-      });
+    samlp.logout(xtend({}, {
+      issuer:             'urn:fixture-test',
+      protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
+      cert:               credentials.cert,
+      key:                credentials.key
+    }, module.exports.options))(req, res, function (err) {
+      if (err) {
+        return res.send(400, err.message);
+      } 
+      next();
     });
   });
 
