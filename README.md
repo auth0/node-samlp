@@ -14,7 +14,9 @@ The idea is that you will use another mechanism to validate the user first.
 
 The endpoint supports metadata as well in the url ```/FederationMetadata/2007-06/FederationMetadata.xml```.
 
-## Usage
+## Login (Authentication Flow)
+
+### Usage
 
 Options
 
@@ -62,6 +64,48 @@ It also accept two optionals parameters:
 
 -  profileMapper: a class implementing the profile mapper. This is used to render the claims type information (using the metadata property). See [PassportProfileMapper](https://github.com/auth0/node-samlp/blob/master/lib/claims/PassportProfileMapper.js) for more information.
 -  endpointPath: this is the full path in your server to the auth route. By default the metadata handler uses the metadata request route without ```/FederationMetadata/2007..blabla.```
+
+## Logout - SLO (Single Logout)
+Starting on version `v2.0` Single Logout is supported (SAML 2.0 Single Logout Profile). General support for SLO among Session Participants is varies a lot. This module supports the following flows:
+
+- IdP Initiated: a logout is initiated by invoking the GET logout endpoint specified in the IdP metadata. The IdP creates a signed SAML `LogoutRequest` and propagates it to the involved Session Participants.
+- SP Initiated: a Session Participant starts a SLO by sending a SAML `LogoutRequest` to the IdP. The IdP propagates it to the involved Session Participants.
+
+Both flows need the IdP to accept SAML `LogoutResponses` from the Session Participants. This is also supported by this module.
+
+### Usage
+
+Options
+
+| Name                | Description                                      | Default                                          |
+| --------------------|:-------------------------------------------------| -------------------------------------------------|
+| cert                | public key used by this identity provider        | REQUIRED                                         |
+| key                 | private key used by this identity provider       | REQUIRED                                         |
+| issuer              | the name of the issuer of the token              | REQUIRED                                         |
+| protocolBinding     | the binding to use                               | 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST' |
+| sessionParticipants | an object that handles Session Participants. Check [this implementation](./lib/sessionParticipants/index.js) | An empty object. It is REQUIRED if you want to use SLO          |
+| clearIdPSession     | a function to be called when the logout process is finished so the IdP can clean its session | function (cb){ return cb(); |
+| store               | an object that handles the HTTP Session. Check [these implementations](./lib/store/) | new SessionStore(options) Uses req.session to store the current state |
+
+
+Add the middleware as follows:
+
+~~~javascript
+  app.get('/logout', samlp.logout({
+      deflate:            true,
+      issuer:             'the-issuer',
+      protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+      cert:               fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
+      key:                fs.readFileSync(path.join(__dirname, 'some-cert.key'))
+  }));
+
+  app.post('/logout', samlp.logout({
+      issuer:             'the-issuer',
+      protocolBinding:    'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
+      cert:               fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
+      key:                fs.readFileSync(path.join(__dirname, 'some-cert.key'))
+  }));
+~~~~
 
 ## Issue Reporting
 
