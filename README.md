@@ -103,7 +103,6 @@ var sessionParticipant = {
   cert: sp1_credentials.cert // The Session Participant public certificate, used to verify the signature of the SAML requests made by this SP
 };
 ```
-It is expected that the `options.sessionParticipants.getAll()` method returns an array of SessionParticipant objects.
 
 
 Add the middleware as follows:
