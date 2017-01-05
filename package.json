@@ -20,10 +20,10 @@
   "license": "mit",
   "dependencies": {
     "ejs": "~0.8.3",
+    "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
     "saml": "^0.10.2",
     "thumbprint": "0.0.1",
-    "uid2": "0.0.3",
     "xml-crypto": "0.8.4",
     "xmldom": "0.1.16",
     "xpath": "0.0.5",
@@ -37,6 +37,7 @@
     "express-session": "^1.14.2",
     "istanbul": "^0.4.5",
     "mocha": "~1.8.1",
-    "request": "~2.14.0"
+    "request": "~2.14.0",
+    "uid2": "0.0.3"
   }
 }

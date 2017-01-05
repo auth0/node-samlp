@@ -85,12 +85,12 @@ Options
 | protocolBinding     | the binding to use                               | 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST' |
 | sessionParticipants | an object that handles Session Participants. Check [this implementation](./lib/sessionParticipants/index.js) | An empty object. It is REQUIRED if you want to use SLO          |
 | clearIdPSession     | a function to be called when the logout process is finished so the IdP can clean its session | function (cb){ return cb(); |
-| store               | an object that handles the HTTP Session. Check [these implementations](./lib/store/) | new SessionStore(options) Uses req.session to store the current state |
+| store               | an object that handles the HTTP Session. Check [this implementation](./test/in_memory_store/) | new SessionStore(options) Uses req.session to store the current state |
 
 #### Notes
 - options.cert: This is the public certificate of the IdP
 - options.key: This is the private key of the IdP. The IdP will sign its SAML `LogoutRequest` and `LogoutResponse` with this key.
-- options.store: Since the logout flow will involve several requests/responses, we need to keep track of the transaction state. The default implementation uses req.session to store the transaction state.
+- options.store: Since the logout flow will involve several requests/responses, we need to keep track of the transaction state. The default implementation uses req.session to store the transaction state via the 'flowstate' module
 - options.sessionParticipants: Will handle SessionParticipant objects. Each SessionParticipant object needs to have the following structure:
 
 ```js

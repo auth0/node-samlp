@@ -284,7 +284,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1',
           };
 
-          // We need to sign the reponse here          
+          // We need to sign the reponse here
           var signature = signers.sign({key: sp2_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
           params.Signature = signature;
 
@@ -554,7 +554,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
 
-      describe.skip('should send Session Participant 1 LogoutResponse to the SAML IdP', function () {
+      describe('should send Session Participant 1 LogoutResponse to the SAML IdP', function () {
         var SAMLRequest2;
         var sessionParticipant2LogoutRequest;
         var sessionParticipant2LogoutRequestRelayState;
@@ -584,7 +584,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           };
 
           // We need to sign the reponse here          
-          var signature = signers.sign({key: sp2_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
+          var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
           params.Signature = signature;
           
           request.get({

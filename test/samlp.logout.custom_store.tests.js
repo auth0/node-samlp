@@ -7,7 +7,8 @@ var xmlhelper     = require('./xmlhelper');
 var zlib          = require('zlib');
 var utils         = require('../lib/utils');
 var qs            = require('querystring');
-var InMemoryStore = require('../lib/store/in_memory_store');
+var signers       = require('../lib/signers');
+var InMemoryStore = require('./in_memory_store');
 var SPs           = require('../lib/sessionParticipants');
 var fs            = require('fs');
 var path          = require('path');
@@ -287,9 +288,22 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           //     <samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
           //     </samlp:Status>
           // </samlp:LogoutResponse>
+          var EncodedAndDeflatedSAMLResponse = 'fZLBasMwDIbvg71D8D2NnTZJZ5rAWC+F7rKWHnYZjquuBccylgN9/CWBQpKN6WAQv6RP/tGGVGOc3OM3tuEDyKEliO6NsSQHqWSttxIV3Uha1QDJoOXh9X0v0wWXzmNAjYY9P0Wj2G1L9pXWtcpBZZAXxXnNiwvP1bzOPpBHLFnP83Gacl3wDGItukcIyOOXtVrFoC+rutawWor1bMwJPN3QlqxbaU4gamFnKSgbOp2LPBZpLPKjWMplIbPic9awBQo3q8Iw7xqCk0liUCtzRQoy4xnv0t4sVk0bo2jTf0AORD+y8H8HFRH4nsaqnkYd7oJYK0+tc+jDAu6qcQYWGptNMiL8jXfyEFRoqZpkb3iG6KRMC/8vQ0O1PLRaAxFLfjOSCWQsP6TpKVU/';
+
+          var params = {
+            SAMLResponse: EncodedAndDeflatedSAMLResponse,
+            RelayState: sessionParticipantLogoutRequestRelayState,
+            SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1',
+          };
+
+          // We need to sign the reponse here          
+          var signature = signers.sign({key: sp2_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
+          params.Signature = signature;
+
           request.get({
             followRedirect: false,
-            uri: 'http://localhost:5050/logout?SAMLResponse=fZLBasMwDIbvg71D8D2NnTZJZ5rAWC%2BF7rKWHnYZjquuBccylgN9%2FCWBQpKN6WAQv6RP%2FtGGVGOc3OM3tuEDyKEliO6NsSQHqWSttxIV3Uha1QDJoOXh9X0v0wWXzmNAjYY9P0Wj2G1L9pXWtcpBZZAXxXnNiwvP1bzOPpBHLFnP83Gacl3wDGItukcIyOOXtVrFoC%2BrutawWor1bMwJPN3QlqxbaU4gamFnKSgbOp2LPBZpLPKjWMplIbPic9awBQo3q8Iw7xqCk0liUCtzRQoy4xnv0t4sVk0bo2jTf0AORD%2By8H8HFRH4nsaqnkYd7oJYK0%2Btc%2BjDAu6qcQYWGptNMiL8jXfyEFRoqZpkb3iG6KRMC%2F8vQ0O1PLRaAxFLfjOSCWQsP6TpKVU%2F&Signature=taHlDQSc0bYUYw%2Bcekm8gt3Y4Pk%2BftEIo5dBXaAW5%2BpyNUW9lb85cvt7QkVchIfY8HH4wa8NbtO6CD1yFLMQrYKLpENW1p6NbkedimbrvaWyobSqccQff81cBe5EMN%2BYuFQetKZhmsdt1pINdsW3W068mZeL6AJgxaxI45UaZzD7Dit%2BmdLzo1p7AnNa1Fr14kFpr2dj94kP32layrMPrgFZpBa4h%2FxqVwKJJ5EXflqEturBrU1zISFY9A7cateqQF89yLX5MQ8wXKXwALBKT2MczPkjLqC8X0ejDgBwBAbeE31cM39Ri%2B20s4JfcCxPnT%2BUVTgPs2Q%2BTPgZVSBBlA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+            uri: 'http://localhost:5050/logout',
+            qs: params
           }, function (err, response) {
             if (err) { return done(err); }
 
@@ -422,6 +436,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
     describe('IdP initiated - 1 Session Participant', function () {
       var SAMLRequest;
       var sessionParticipantLogoutRequest;
+      var sessionParticipantLogoutRequestRelayState;
       var sessionParticipantLogoutRequestSigAlg;
       var sessionParticipantLogoutRequestSignature;
 
@@ -446,6 +461,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           var parsedQueryString = qs.parse(completeQueryString);
 
           SAMLRequest = parsedQueryString.SAMLRequest;
+          sessionParticipantLogoutRequestRelayState = parsedQueryString.RelayState;
           sessionParticipantLogoutRequestSigAlg = parsedQueryString.SigAlg;
           sessionParticipantLogoutRequestSignature = parsedQueryString.Signature;
 
@@ -470,12 +486,14 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       it('should validate LogoutRequest signature', function () {
         expect(SAMLRequest).to.exist;
+        expect(sessionParticipantLogoutRequestRelayState).to.exist;
         expect(sessionParticipantLogoutRequestSigAlg).to.exist;
         expect(sessionParticipantLogoutRequestSignature).to.exist;
 
         var params =  {
           query: {
             SAMLRequest: SAMLRequest,
+            RelayState: sessionParticipantLogoutRequestRelayState,
             SigAlg: sessionParticipantLogoutRequestSigAlg,
             Signature: sessionParticipantLogoutRequestSignature
           }
@@ -488,6 +506,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
     describe('IdP initiated - 2 Session Participant', function () {
       var SAMLRequest;
       var sessionParticipantLogoutRequest;
+      var sessionParticipantLogoutRequestRelayState;
       var sessionParticipantLogoutRequestSigAlg;
       var sessionParticipantLogoutRequestSignature;
 
@@ -514,6 +533,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           var parsedQueryString = qs.parse(completeQueryString);
 
           SAMLRequest = parsedQueryString.SAMLRequest;
+          sessionParticipantLogoutRequestRelayState = parsedQueryString.RelayState;
           sessionParticipantLogoutRequestSigAlg = parsedQueryString.SigAlg;
           sessionParticipantLogoutRequestSignature = parsedQueryString.Signature;
 
@@ -539,12 +559,14 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       it('should validate LogoutRequest signature', function () {
         expect(SAMLRequest).to.exist;
+        expect(sessionParticipantLogoutRequestRelayState).to.exist;
         expect(sessionParticipantLogoutRequestSigAlg).to.exist;
         expect(sessionParticipantLogoutRequestSignature).to.exist;
 
         var params =  {
           query: {
             SAMLRequest: SAMLRequest,
+            RelayState: sessionParticipantLogoutRequestRelayState,
             SigAlg: sessionParticipantLogoutRequestSigAlg,
             Signature: sessionParticipantLogoutRequestSignature
           }
@@ -575,10 +597,23 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           //     <samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
           //     </samlp:Status>
           // </samlp:LogoutResponse>
+          var EncodedAndDeflatedSAMLResponse = 'fZJBa8MwDIXvg/2H4Hsbx12SItrAWC+F7rKWHnYZrqOuZYllIhvGfv2SQCHJRoUu4unpMw+vWNeVgx19UvBvyI4sY/RdV5ahl9YiNBZI85XB6hoZvIH98+sO1FyCa8iToUo8PkSD2m7W4kOdTjpDnWKW5+VS5meZ6emevSEP1DryRVnqpTSZSVSmFnl+TtXEccSGr2TXoqVPjzEH3Fr22vpWl0k2S9RMLQ/JApKntt8nhg2yv1rt+3sX7x3EcUVGVxdiD6lMZTt2uYhibIyiVZcN9MRmkNb9sDQzNh1NFB2NW9yZ6KQbDs5R4+c/aEvkr7mhehUPCP/jHey99oGL0fRCJUZHXQW8/xjut2EfjEFmEf9lxCPIUL5J419T/AI=';
+
+          var params = {
+            SAMLResponse: EncodedAndDeflatedSAMLResponse,
+            RelayState: sessionParticipantLogoutRequestRelayState,
+            SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1',
+          };
+
+          // We need to sign the reponse here
+          var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
+          params.Signature = signature;
+
           request.get({
             jar: request.jar(),
             followRedirect: false,
-            uri: 'http://localhost:5050/logout?SAMLResponse=fZJBa8MwDIXvg%2F2H4Hsbx12SItrAWC%2BF7rKWHnYZrqOuZYllIhvGfv2SQCHJRoUu4unpMw%2BvWNeVgx19UvBvyI4sY%2FRdV5ahl9YiNBZI85XB6hoZvIH98%2BsO1FyCa8iToUo8PkSD2m7W4kOdTjpDnWKW5%2BVS5meZ6emevSEP1DryRVnqpTSZSVSmFnl%2BTtXEccSGr2TXoqVPjzEH3Fr22vpWl0k2S9RMLQ%2FJApKntt8nhg2yv1rt%2B3sX7x3EcUVGVxdiD6lMZTt2uYhibIyiVZcN9MRmkNb9sDQzNh1NFB2NW9yZ6KQbDs5R4%2Bc%2FaEvkr7mhehUPCP%2FjHey99oGL0fRCJUZHXQW8%2Fxjut2EfjEFmEf9lxCPIUL5J419T%2FAI%3D&Signature=Kgn5XbPJr26o5Nt3xWmsBi4b2lpz8wBnMXuMDAXUGHH%2B7jJcvHd2qL0O3j3drVzzZQ7aGde4Z%2FISi4p4nWHQFhvdHie7A3TM5u527gEzWMachI7PoOvNu9U1oXcOxt9srz2vHEmdCkDCUtwpkk%2FqkDiL10SHzSKIox8r6KdVrHhkI0Zm%2FUpyQeetLu6LLHE6mlmntQwktSmgyUXbru3kZbd16MhlR5xoJ4Rn9ZVDqfHx0kEKLk3NLILhUlxq%2BFKYlrP1WPGYNEnSv9tqT3rV8YOP0lKe4INP5THP9zT5iKVFhzq4wiOorhnXTVJ6m7ctH9MQgYXcGG3UzSIAqpVAWA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+            uri: 'http://localhost:5050/logout',
+            qs: params
           }, function (err, response) {
             if (err) { return done(err); }
             expect(response.statusCode).to.equal(302);
@@ -816,7 +851,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
             json: true,
             body: {
               SAMLResponse: 'PHNhbWxwOkxvZ291dFJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb2wiIElEPSJfMmJiYTZlYTVlNjc3ZDgwN2YwNmEiIEluUmVzcG9uc2VUbz0ic2FtbHItMjIwYzcwNWUtYzE1ZS0xMWU2LTk4YTQtZWNmNGJiY2U0MzE4IiBWZXJzaW9uPSIyLjAiIElzc3VlSW5zdGFudD0iMjAxNi0xMi0xNlQxMzozNzo1N1oiIERlc3RpbmF0aW9uPSJodHRwOi8vbG9jYWxob3N0OjUwNTAvbG9nb3V0Ij4KICAgIDxzYW1sOklzc3VlciB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj5odHRwczovL2Zvb2JhcnN1cHBvcnQuZXhhbXBsZS5jb208L3NhbWw6SXNzdWVyPjxkczpTaWduYXR1cmUgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpTaWduZWRJbmZvPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI3JzYS1zaGEyNTYiLz48ZHM6UmVmZXJlbmNlIFVSST0iI18yYmJhNmVhNWU2NzdkODA3ZjA2YSI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIi8+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHM6VHJhbnNmb3Jtcz48ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PGRzOkRpZ2VzdFZhbHVlPkxXUmUrbGNNR0VRYTlPYjlsc0hpUk5Ob29pUDgyM2JwVFA2OFVXMUdRR0U9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPlAxeUdBaGxJZEQvZUFYWERUb0JSQ3VXekxneldxaEZpQURqMDRLcmMvSmNaNlZwVjJhVXpSWjJDR21SOUZaNVdXZlU2VVB0SG5VYU1iSVR6NjZFSEdBaCtNcC9JajNJWU1qeVltWnJtTDhJSlFZWHkzMTFwU2REQnU4REJJUm5aQkpLSG5EV0VtT0doS2NJcHhTa1hveVd3NlpCK090VWh5d3dGKzVPMXh5cnk0alJQODlxV28wN2M0MzZaMHNkbWNhZkRkU1NpeTdkMVRVMUphN0VUYnhBYnVaSFRwUDNYSzFLeTdrNUZWU3ZxcCtYc2xsVTBTWTlkMWhFd0ZlSEpnOWdCa2xxVm1iYUdGV0FhK0xZTGoxWGd2KzBnejdWa2ptVTJUV2ZZQVE2MU9vbkJ5TWpKcWFqbk5oWkorODN6L2RLbWZSd200V3FUK0hwVFVJcUhaQT09PC9kczpTaWduYXR1cmVWYWx1ZT48ZHM6S2V5SW5mbz48ZHM6WDUwOURhdGEvPjwvZHM6S2V5SW5mbz48L2RzOlNpZ25hdHVyZT4KICAgIDxzYW1scDpTdGF0dXM+PHNhbWxwOlN0YXR1c0NvZGUgVmFsdWU9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpzdGF0dXM6U3VjY2VzcyIvPgogICAgPC9zYW1scDpTdGF0dXM+Cjwvc2FtbHA6TG9nb3V0UmVzcG9uc2U+',
-              RelayState: '123'
+              RelayState: sessionParticipantLogoutRequestRelayState
             }
           }, function (err, response) {
             if (err) { return done(err); }
@@ -920,6 +955,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
     });
 
     describe('SP initiated - 2 Session Participants - Partial Logout with Error on SP', function () {
+      var samlRequestRelayState;
       // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
       //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
       //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
@@ -950,6 +986,10 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           // IDP Sends LogoutRequest to second IDP
           var SAMLRequest = $('input[name="SAMLRequest"]').attr('value');
           expect(SAMLRequest).to.be.ok;
+
+          samlRequestRelayState = $('input[name="RelayState"]').attr('value');
+          expect(samlRequestRelayState).to.be.ok;
+
           done();
         });
       });
@@ -972,7 +1012,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
             json: true,
             body: {
               SAMLResponse: 'PHNhbWxwOkxvZ291dFJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb2wiIElEPSJfMmJiYTZlYTVlNjc3ZDgwN2YwNmEiIEluUmVzcG9uc2VUbz0ic2FtbHItMjIwYzcwNWUtYzE1ZS0xMWU2LTk4YTQtZWNmNGJiY2U0MzE4IiBWZXJzaW9uPSIyLjAiIElzc3VlSW5zdGFudD0iMjAxNi0xMi0xNlQxMzozNzo1N1oiIERlc3RpbmF0aW9uPSJodHRwOi8vbG9jYWxob3N0OjUwNTAvbG9nb3V0Ij4KICAgIDxzYW1sOklzc3VlciB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj5odHRwczovL2Zvb2JhcnN1cHBvcnQuZXhhbXBsZS5jb208L3NhbWw6SXNzdWVyPjxkczpTaWduYXR1cmUgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpTaWduZWRJbmZvPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI3JzYS1zaGEyNTYiLz48ZHM6UmVmZXJlbmNlIFVSST0iI18yYmJhNmVhNWU2NzdkODA3ZjA2YSI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIi8+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHM6VHJhbnNmb3Jtcz48ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PGRzOkRpZ2VzdFZhbHVlPko0cEdYY2RlZnZNa3NHYWhsbnFndUFxcmRwanVSMWgvV0t5eUdoV1R6c0U9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPldxeGN0L05zWGxocU9hY3hwMUVWampFd1FrdGx5dUVKU01mSk1Iem0vVkNGNnFmZ1lLaTk5NzdsRW1wVjJLS3FPeVo0M2FOMmZSaGx5cHRpOWt6RUlOWm01OURKTnlKb0xBVUhua09TMWxsajJlMytjeG03eDIzTjd3ZDNQNHBzNFBvYzl5U2RBK01KWHBTUCtKbFl3T3pOZWwxaERwTVE5dENRSlhZR3FCSmxkdGxzSWd1bFB5TTdoczlyWXNnZ2syQlVxMEJ4VVFVdnlnWkZRUTB5aEh6RXo3OGQ2ek1DQlphQ2VFbEVVN01wUjMwQXZKcVBNa09tdVA1SllmRDJ0ZzI4VmZndnV3a2dXdThiOU1lTUdjaG0xaW41Mm53cVdzcnoxanZrL3daYXdTRjIrVlNJL2VOdzdieWdEQW9XWUljbjRzbENUaXZBVkQ4cTNkZW9DZz09PC9kczpTaWduYXR1cmVWYWx1ZT48ZHM6S2V5SW5mbz48ZHM6WDUwOURhdGEvPjwvZHM6S2V5SW5mbz48L2RzOlNpZ25hdHVyZT4KICAgIDxzYW1scDpTdGF0dXM+PHNhbWxwOlN0YXR1c0NvZGUgVmFsdWU9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpzdGF0dXM6UmVxdWVzdGVyIi8+CiAgICA8L3NhbWxwOlN0YXR1cz4KPC9zYW1scDpMb2dvdXRSZXNwb25zZT4=',
-              RelayState: '123'
+              RelayState: samlRequestRelayState
             }
           }, function (err, response) {
             if (err) { return done(err); }
@@ -1076,7 +1116,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
             json: true,
             body: {
               SAMLResponse: 'PHNhbWxwOkxvZ291dFJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb2wiIElEPSJfMmJiYTZlYTVlNjc3ZDgwN2YwNmEiIEluUmVzcG9uc2VUbz0ic2FtbHItMjIwYzcwNWUtYzE1ZS0xMWU2LTk4YTQtZWNmNGJiY2U0MzE4IiBWZXJzaW9uPSIyLjAiIElzc3VlSW5zdGFudD0iMjAxNi0xMi0xNlQxMzozNzo1N1oiIERlc3RpbmF0aW9uPSJodHRwOi8vbG9jYWxob3N0OjUwNTAvbG9nb3V0Ij4KICAgIDxzYW1sOklzc3VlciB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj5odHRwczovL2Zvb2JhcnN1cHBvcnQuZXhhbXBsZS5jb208L3NhbWw6SXNzdWVyPjxkczpTaWduYXR1cmUgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpTaWduZWRJbmZvPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI3JzYS1zaGEyNTYiLz48ZHM6UmVmZXJlbmNlIFVSST0iI18yYmJhNmVhNWU2NzdkODA3ZjA2YSI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIi8+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHM6VHJhbnNmb3Jtcz48ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PGRzOkRpZ2VzdFZhbHVlPkxXUmUrbGNNR0VRYTlPYjlsc0hpUk5Ob29pUDgyM2JwVFA2OFVXMUdRR0U9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPlAxeUdBaGxJZEQvZUFYWERUb0JSQ3VXekxneldxaEZpQURqMDRLcmMvSmNaNlZwVjJhVXpSWjJDR21SOUZaNVdXZlU2VVB0SG5VYU1iSVR6NjZFSEdBaCtNcC9JajNJWU1qeVltWnJtTDhJSlFZWHkzMTFwU2REQnU4REJJUm5aQkpLSG5EV0VtT0doS2NJcHhTa1hveVd3NlpCK090VWh5d3dGKzVPMXh5cnk0alJQODlxV28wN2M0MzZaMHNkbWNhZkRkU1NpeTdkMVRVMUphN0VUYnhBYnVaSFRwUDNYSzFLeTdrNUZWU3ZxcCtYc2xsVTBTWTlkMWhFd0ZlSEpnOWdCa2xxVm1iYUdGV0FhK0xZTGoxWGd2KzBnejdWa2ptVTJUV2ZZQVE2MU9vbkJ5TWpKcWFqbk5oWkorODN6L2RLbWZSd200V3FUK0hwVFVJcUhaQT09PC9kczpTaWduYXR1cmVWYWx1ZT48ZHM6S2V5SW5mbz48ZHM6WDUwOURhdGEvPjwvZHM6S2V5SW5mbz48L2RzOlNpZ25hdHVyZT4KICAgIDxzYW1scDpTdGF0dXM+PHNhbWxwOlN0YXR1c0NvZGUgVmFsdWU9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpzdGF0dXM6U3VjY2VzcyIvPgogICAgPC9zYW1scDpTdGF0dXM+Cjwvc2FtbHA6TG9nb3V0UmVzcG9uc2U+',
-              RelayState: '123'
+              RelayState: sessionParticipantLogoutRequestRelayState
             }
           }, function (err, response) {
             if (err) { return done(err); }
