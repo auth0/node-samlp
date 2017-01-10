@@ -124,6 +124,25 @@ Add the middleware as follows:
   }));
 ~~~~
 
+## Error handling
+
+Errors are not sent back to the SP. To do so, you'll need to use the `sendError` middleware.
+
+~~~javascript
+samlp.sendError({
+    RelayState:         'relayState',
+    issuer:             'the-issuer',
+    signatureAlgorithm: 'rsa-sha1',
+    digestAlgorithm:    'sha1',
+    cert:               fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
+    key:                fs.readFileSync(path.join(__dirname, 'some-cert.key')),
+    error: { description: err.message },
+    getPostURL: function (req, callback) {
+      callback(null, 'http://someurl.com');
+    }
+})(req, res, next);
+~~~~
+
 ## Issue Reporting
 
 If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker. The [Responsible Disclosure Program](https://auth0.com/whitehat) details the procedure for disclosing security issues.
