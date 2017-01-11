@@ -5,8 +5,8 @@
 <body>
     <form method="post" name="hiddenform" action="<%= callback %>">
         <input type="hidden" 
-               name="SAMLResponse" 
-               value="<%= SAMLResponse %>">
+               name="<%= type %>" 
+               value="<%= token %>">
         <input type="hidden" name="RelayState" value="<%= RelayState %>">
         <noscript>
             <p>
@@ -15,7 +15,7 @@
         </noscript>
     </form>
     <script language="javascript" type="text/javascript">
-        window.setTimeout(function(){document.forms[0].submit();}, 0);
+        window.setTimeout('document.forms[0].submit()', 0);
     </script>
 </body>
 </html>
