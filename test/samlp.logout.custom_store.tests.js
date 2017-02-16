@@ -161,7 +161,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           var i = response.headers.location.indexOf('SAMLResponse=');
           var query = qs.parse(response.headers.location.substr(i));
           var SAMLResponse = query.SAMLResponse;
-          RelayState = query.RelayState
+          RelayState = query.RelayState;
           
           zlib.inflateRaw(new Buffer(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
             if(err) return done(err);
