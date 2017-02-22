@@ -53,6 +53,22 @@ exports.getInResponseTo = function(response) {
   return destination;
 };
 
+exports.getStatusCode = function(response) {
+  var doc = new xmldom.DOMParser().parseFromString(response);
+  var status = doc.documentElement
+                  .getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:protocol', 'StatusCode')[0]
+                  .getAttribute('Value');
+  return status;
+};
+
+exports.getStatusMessage = function(response) {
+  var doc = new xmldom.DOMParser().parseFromString(response);
+  var message = doc.documentElement
+                  .getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:protocol', 'StatusMessage')[0]
+                  .textContent;
+  return message;
+};
+
 exports.getSignatureMethodAlgorithm = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement

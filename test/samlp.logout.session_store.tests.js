@@ -1137,7 +1137,84 @@ describe('samlp logout with Session Participants - Session Provider', function (
         expect(response.body).to.equal('Signature check errors: invalid signature: the signature value asidjpasjdpasjndoubvuojewprjweprj is incorrect');
       });
     });
+  });
+});
 
-    //TODO IdP initiated with 1 and 2 SP configured with POST binding
+describe('samlp logout with Session Participants - Session Provider', function () {
+  var sessions = [], returnError;
+  var samlIdPIssuer = 'urn:fixture-test';
+  var configuredDestination = 'default-destination-url';
+  
+  before(function (done) {
+    server.start( { 
+      audience: 'https://auth0-dev-ed.my.salesforce.com',
+      issuer: samlIdPIssuer,
+      clearIdPSession: function(cb){
+        if (returnError){
+          cb(new Error('There was an error cleaning session'));
+        }
+        cb();
+      },
+      destination: configuredDestination,
+      sessionParticipants: new SPs(sessions)
+    },done);
+  });
+
+  after(function (done) {
+    server.close(done);
+  });
+
+  describe('SP initiated - Should reply back when configured with default destination and there is no session', function(){
+    var logoutResultValue, relayState, samlResponse, signedAssertion, $, destination;
+
+    before(function () {
+      // No sessions
+      sessions = [];
+    });
+
+    // SAMLRequest: base64 encoded + deflated + URLEncoded
+    // Signature: URLEncoded
+    // SigAlg: URLEncoded
+
+    // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+    //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+    //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+    //   <saml:SessionIndex>1</saml:SessionIndex>
+    // </samlp:LogoutRequest>
+    before(function (done) {
+      request.post({
+        followRedirect: false,
+        uri: 'http://localhost:5050/logout',
+        json: true,
+        body: {
+          SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
+          RelayState: '123'
+        }
+      }, function (err, response){
+        if (err) { return done(err); }
+        expect(response.statusCode).to.equal(200);
+        $ = cheerio.load(response.body);
+        var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+        destination = $('form').attr('action');
+        relayState = $('input[name="RelayState"]').attr('value');        
+        samlResponse = new Buffer(SAMLResponse, 'base64');
+        signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(samlResponse)[1];
+        var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+        logoutResultValue = doc.documentElement.getAttribute('Value');
+        done();
+      });
+    });
+
+    it('should respond with a Success value', function () {
+      expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+    });
+
+    it('should include RelayState', function () {
+      expect(relayState).to.equal('123');
+    });
+
+    it('should post to destination URL', function () {
+      expect(destination).to.equal(configuredDestination);
+    });
   });
 });
