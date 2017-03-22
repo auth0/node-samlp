@@ -50,7 +50,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       issuer: samlIdPIssuer,
       clearIdPSession: function(cb){
         if (returnError){
-          cb(new Error('There was an error cleaning session'));
+          return cb(new Error('There was an error cleaning session'));
         }
         cb();
       },
@@ -377,7 +377,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         request.get({
           jar: request.jar(),
           followRedirect: false,
-          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8NAEIXvhf6HsPdNM2mtdWiDhSIEqgdbPHjbbqYazO7GnQ0Uf73bVDAKetnDm%2B%2FNm8cuWZmmxa17cV14pPeOOCQn01jGfrISnbfoFNeMVhliDBp36%2Fst5mmGrXfBadeIgeV%2Fh2ImH2pnRVJuVuJs8DLPM32dXZHUEB8AmsubhZpJ0sfZ4aBpNoVF5Jk7Ki0HZcNK5BnMJeQSpntYYAYI%2BbNInshzXB7HaSaK8ShJlucI7L2%2BeA2hZZxMjs4dlOeubZ0P6QfZivgt1c4sJ0P82%2F8Qi5Sb5M55o8LfDSGFXqkreexRJKPqZl1VnphFEXNv6aRM29Ag7bJ8kLaLcGxRxrNOBXxRP8Tx6KL%2B%2BrniEw%3D%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZFPS8NAEMXv%2FRRh75tm0lrr0AYLRQhUD1Y8eNtuphrM%2FnFnA8VP7zbFUgW97OHN782bxy5Ymc7jxr26Pj7SR08cs4PpLOMwWYo%2BWHSKW0arDDFGjdvV%2FQbLvEAfXHTadeLC8r9DMVOIrbMiq9dLcTQEWZaFvi6uSGpIDwDN5M1cTSXp%2FXS30zSdwDzxzD3VlqOycSnKAmYSSgmTJ5hjAQjli8ieKXBansZ5IapRli2OCThYQ%2FUWo2ccj%2FfO7VTg3nsXYv5JtiF%2Bz7Uzi%2FElfrY%2FpBr1Ortzwaj4dz%2FIYVDaRu4HFMmotls1TSBmUaXYWzoo4zu6CDstP4d53CY4dajTVYcKTtQvdfSt%2Fvi36gs%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, res){
           if(err) return done(err);
           response = res;
@@ -388,6 +388,76 @@ describe('samlp logout with Session Participants - Session Provider', function (
       it('should return invalid signture error', function(){
         expect(response.statusCode).to.equal(400);
         expect(response.body).to.equal('Signature check errors: The signature provided (asidjpasjdpasjndoubvuojewprjweprj) does not match the one calculated');
+      });
+    });
+
+    describe('SP initiated - Session Index does not match an active session', function () {
+      var response;
+
+      before(function () {
+        sessions.splice(0);
+        sessions.push(sessionParticipant1);
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+      //   <saml:SessionIndex>123</saml:SessionIndex>
+      // </samlp:LogoutRequest>
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBSwMxEIXv%2FRVL7tnupLXWoV0sFGGherDiwVuaneriJlkzWSj%2BetOtaBX0ksOb782bRxasbdvhxj%2F7Pt7TW08cs4NtHeMwWYo%2BOPSaG0anLTFGg9vV7QZVXmAXfPTGt%2BLM8r9DM1OIjXciq9ZLcTQEqVRhLosLkgbSA0AzeTXXU0lmP93tDE0nME88c0%2BV46hdXApVwEyCkjB5gDkWgKCeRPZIgdPyNM4LUY6ybHFMwMEaypcYO8bxeO%2F9Tgfuu86HmL%2BTq4lfc%2BPtYnyOf9nvUo1qnd34YHX8ux%2FkMChNLfcDimR1067qOhCzKFPsNR207Vo6Czst%2Fw7bJjZVqNJRhxLU5BP7IY9O4q9%2FKz8A&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+        }, function (err, res){
+          if(err) return done(err);
+          response = res;
+          done();
+        });
+      });
+
+      it('should return invalid session participant', function(){
+        expect(response.statusCode).to.equal(400);
+        expect(response.body).to.equal('Invalid Session Participant');        
+      });
+    });
+
+    describe('SP initiated - NameID does not match an active session', function () {
+      var response;
+
+      before(function () {
+        sessions.splice(0);
+        sessions.push(sessionParticipant1);
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">bar@example.com</saml:NameID>
+      //   <saml:SessionIndex>1</saml:SessionIndex>
+      // </samlp:LogoutRequest>
+      before(function (done) {
+        request.get({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZHBTsMwEETv%2FYrId6fZNJSyaiMqVUiRCgeKOHBznS1ExHbwOlLF1%2BOmCAISXHyYfbOzIy9ZmbbDrXt2fbint544JEfTWsZhshK9t%2BgUN4xWGWIMGnfr2y3maYadd8Fp14qR5X%2BHYiYfGmdFUm1W4mTwMs8zfZldkNQQHwCay6uFKiTpQ7HfaypmsIg8c0%2BV5aBsWIk8g7mEXMLsARaYAUL%2BJJJH8hyXx3GaiXKSJMtTAg5WX76E0DFOpwfn9spz33XOh%2FSdbE38mmpnltMx%2FmW%2FizWqTXLjvFHh736QwqA0tTwMKJJRTbuua0%2FMooyZ13RUpmtpFHZe%2Fh22i2ysUMWjjiV8Qj%2FEyVn89WvlBw%3D%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+        }, function (err, res){
+          if(err) return done(err);
+          response = res;
+          done();
+        });
+      });
+
+      it('should return invalid session participant', function(){
+        expect(response.statusCode).to.equal(400);
+        expect(response.body).to.equal('Invalid Session Participant');
       });
     });
 
@@ -1120,7 +1190,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5hc2lkanBhc2pkcGFzam5kb3VidnVvamV3cHJqd2Vwcmo8L2RzOlNpZ25hdHVyZVZhbHVlPjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPgogIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+Zm9vQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICA8c2FtbDpTZXNzaW9uSW5kZXg+MTwvc2FtbDpTZXNzaW9uSW5kZXg+Cjwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5YRENVcm5mbENKUTJ3bVV5bmFWaDRDRnZNOUx2MHdUTXBUSUkxbEVtTi9FPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5hc2lkanBhc2pkcGFzam5kb3VidnVvamV3cHJqd2Vwcmo8L2RzOlNpZ25hdHVyZVZhbHVlPjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPgogIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+Zm9vQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICA8c2FtbHA6U2Vzc2lvbkluZGV4PjE8L3NhbWxwOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
             RelayState: '123'
           }
         }, function (err, res){
@@ -1137,6 +1207,84 @@ describe('samlp logout with Session Participants - Session Provider', function (
         expect(response.body).to.equal('Signature check errors: invalid signature: the signature value asidjpasjdpasjndoubvuojewprjweprj is incorrect');
       });
     });
+
+    describe('SP initiated - Session Index does not match an active session', function(){
+      var response;
+
+      before(function () {
+        sessions.splice(0);
+        sessions.push({
+          serviceProviderId : 'https://foobarsupport.zendesk.com',
+          nameId: 'foo@example.com',
+          sessionIndex: '1',
+          serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert
+        });
+      });
+
+      before(function (done) {
+        request.post({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout',
+          json: true,
+          body: {
+            // Different sessionIndex
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5hc2lkanBhc2pkcGFzam5kb3VidnVvamV3cHJqd2Vwcmo8L2RzOlNpZ25hdHVyZVZhbHVlPjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPgogIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+Zm9vQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICA8c2FtbDpTZXNzaW9uSW5kZXg+MTIzPC9zYW1sOlNlc3Npb25JbmRleD4KPC9zYW1scDpMb2dvdXRSZXF1ZXN0Pg==',
+            RelayState: '123'
+          }
+        }, function (err, res){
+          if(err) return done(err);
+          response = res;
+
+          done();
+        });
+      });
+
+      it('should return invalid session participant', function () {
+        expect(response.statusCode).to.equal(400);
+        expect(response.body).to.equal('Invalid Session Participant');
+      });
+    });
+
+    describe('SP initiated - NameID does not match an active session', function(){
+      var response;
+
+      before(function () {
+        sessions.splice(0);
+        sessions.push({
+          serviceProviderId : 'https://foobarsupport.zendesk.com',
+          nameId: 'foo@example.com',
+          sessionIndex: '1',
+          serviceProviderLogoutURL: 'https://example.com/logout',
+          cert: sp1_credentials.cert
+        });
+      });
+
+      before(function (done) {
+        request.post({
+          jar: request.jar(),
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout',
+          json: true,
+          body: {
+            // Different nameID
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5hc2lkanBhc2pkcGFzam5kb3VidnVvamV3cHJqd2Vwcmo8L2RzOlNpZ25hdHVyZVZhbHVlPjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPgogIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+YmFyQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICA8c2FtbDpTZXNzaW9uSW5kZXg+MTwvc2FtbDpTZXNzaW9uSW5kZXg+Cjwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
+            RelayState: '123'
+          }
+        }, function (err, res){
+          if(err) return done(err);
+          response = res;
+
+          done();
+        });
+      });
+
+      it('should return invalid session participant', function () {
+        expect(response.statusCode).to.equal(400);
+        expect(response.body).to.equal('Invalid Session Participant');
+      });
+    });
   });
 });
 
@@ -1151,7 +1299,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       issuer: samlIdPIssuer,
       clearIdPSession: function(cb){
         if (returnError){
-          cb(new Error('There was an error cleaning session'));
+          return cb(new Error('There was an error cleaning session'));
         }
         cb();
       },

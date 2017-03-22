@@ -53,7 +53,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       store: testStore,
       clearIdPSession: function(cb){
         if (returnError){
-          cb(new Error('There was an error cleaning session'));
+          return cb(new Error('There was an error cleaning session'));
         }
         cb();
       },
@@ -306,7 +306,6 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
             qs: params
           }, function (err, response) {
             if (err) { return done(err); }
-
             expect(response.statusCode).to.equal(302);
             var qs = require('querystring');
 
@@ -390,7 +389,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         request.get({
           jar: request.jar(),
           followRedirect: false,
-          uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8NAEIXvhf6HsPdNM2mtdWiDhSIEqgdbPHjbbqYazO7GnQ0Uf73bVDAKetnDm%2B%2FNm8cuWZmmxa17cV14pPeOOCQn01jGfrISnbfoFNeMVhliDBp36%2Fst5mmGrXfBadeIgeV%2Fh2ImH2pnRVJuVuJs8DLPM32dXZHUEB8AmsubhZpJ0sfZ4aBpNoVF5Jk7Ki0HZcNK5BnMJeQSpntYYAYI%2BbNInshzXB7HaSaK8ShJlucI7L2%2BeA2hZZxMjs4dlOeubZ0P6QfZivgt1c4sJ0P82%2F8Qi5Sb5M55o8LfDSGFXqkreexRJKPqZl1VnphFEXNv6aRM29Ag7bJ8kLaLcGxRxrNOBXxRP8Tx6KL%2B%2BrniEw%3D%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZFPS8NAEMXv%2FRRh75tm0lrr0AYLRQhUD1Y8eNtuphrM%2FnFnA8VP7zbFUgW97OHN782bxy5Ymc7jxr26Pj7SR08cs4PpLOMwWYo%2BWHSKW0arDDFGjdvV%2FQbLvEAfXHTadeLC8r9DMVOIrbMiq9dLcTQEWZaFvi6uSGpIDwDN5M1cTSXp%2FXS30zSdwDzxzD3VlqOycSnKAmYSSgmTJ5hjAQjli8ieKXBansZ5IapRli2OCThYQ%2FUWo2ccj%2FfO7VTg3nsXYv5JtiF%2Bz7Uzi%2FElfrY%2FpBr1Ortzwaj4dz%2FIYVDaRu4HFMmotls1TSBmUaXYWzoo4zu6CDstP4d53CY4dajTVYcKTtQvdfSt%2Fvi36gs%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, res){
           if(err) return done(err);
           response = res;
@@ -1087,7 +1086,6 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           if(err) return done(err);
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
-          // 
           SAMLRequest = $('input[name="SAMLRequest"]').attr('value');
           sessionParticipantLogoutRequestRelayState = $('input[name="RelayState"]').attr('value');
           sessionParticipantLogoutRequest = new Buffer(SAMLRequest, 'base64').toString();
@@ -1159,7 +1157,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
-            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHM6U2lnbmVkSW5mbz48ZHM6Q2Fub25pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzOlJlZmVyZW5jZSBVUkk9IiNzYW1sci0yMjBjNzA1ZS1jMTVlLTExZTYtOThhNC1lY2Y0YmJjZTQzMTgiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkczpEaWdlc3RWYWx1ZT5tV1RvQUJuVExDd0xJOEFFOW1RYnFTZ3NCVnNsOXNpWG9sMG9yVXVUa0dBPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPjxkczpTaWduYXR1cmVWYWx1ZT5hc2lkanBhc2pkcGFzam5kb3VidnVvamV3cHJqd2Vwcmo8L2RzOlNpZ25hdHVyZVZhbHVlPjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPgogIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+Zm9vQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICA8c2FtbDpTZXNzaW9uSW5kZXg+MTwvc2FtbDpTZXNzaW9uSW5kZXg+Cjwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
+            SAMLRequest: 'PHNhbWxwOkxvZ291dFJlcXVlc3QgeG1sbnM6c2FtbHA9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgeG1sbnM6c2FtbD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbiIgSUQ9InNhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCIgSXNzdWVJbnN0YW50PSIyMDE2LTEyLTEzVDE4OjAxOjEyWiIgVmVyc2lvbj0iMi4wIj4KICAgIDxzYW1sOklzc3Vlcj5odHRwczovL2Zvb2JhcnN1cHBvcnQuemVuZGVzay5jb208L3NhbWw6SXNzdWVyPjxkczpTaWduYXR1cmUgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpTaWduZWRJbmZvPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI3JzYS1zaGEyNTYiLz48ZHM6UmVmZXJlbmNlIFVSST0iI3NhbWxyLTIyMGM3MDVlLWMxNWUtMTFlNi05OGE0LWVjZjRiYmNlNDMxOCI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIi8+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHM6VHJhbnNmb3Jtcz48ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PGRzOkRpZ2VzdFZhbHVlPkxYODU1SWtuZ1NUczRUTmNqMnVHaWcrdWdla0J3N0dpd1FKRC9WTVJFV3c9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPmFzaWRqcGFzamRwYXNqbmRvdWJ2dW9qZXdwcmp3ZXByajwvZHM6U2lnbmF0dXJlVmFsdWU+PGRzOktleUluZm8+PGRzOlg1MDlEYXRhLz48L2RzOktleUluZm8+PC9kczpTaWduYXR1cmU+CiAgICAKICAgIDxzYW1sOk5hbWVJRCBGb3JtYXQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjEuMTpuYW1laWQtZm9ybWF0OmVtYWlsQWRkcmVzcyI+Zm9vQGV4YW1wbGUuY29tPC9zYW1sOk5hbWVJRD4KICAgIDxzYW1scDpTZXNzaW9uSW5kZXg+MTwvc2FtbHA6U2Vzc2lvbkluZGV4Pgo8L3NhbWxwOkxvZ291dFJlcXVlc3Q+',
             RelayState: '123'
           }
         }, function (err, res){
