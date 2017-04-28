@@ -77,5 +77,25 @@ describe('samlp parse response', function() {
           });
       });
     });
+
+    describe('when request is not a valid XML', function(){
+      // There was a bug in xmldom causing an infinite loop in this case
+      it('should return an empty object', function(done){
+        const req = '<samlp:AuthnRequest';
+        samlp.parseRequest({
+          query: {
+            SAMLRequest: new Buffer(req).toString('base64'),
+            RelayState: '123'
+          }
+        }, {
+          relayState: '123'
+        }, function(err, result) {
+          expect(err).to.exist;
+          expect(err.message).to.equal('expected null to exist');
+          expect(result).to.be.undefined;
+          done();
+        });
+      });
+    });
   });
 });
