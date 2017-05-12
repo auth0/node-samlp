@@ -15,7 +15,7 @@ describe('samlp metadata', function () {
   before(function (done) {
     server.start(done);
   });
-  
+
   after(function (done) {
     server.close(done);
   });
@@ -24,7 +24,7 @@ describe('samlp metadata', function () {
     var doc, content;
     before(function (done) {
       request.get({
-        jar: request.jar(), 
+        jar: request.jar(),
         uri: 'http://localhost:5050/samlp/FederationMetadata/2007-06/FederationMetadata.xml'
       }, function (err, response, b){
         if(err) return done(err);
@@ -53,7 +53,7 @@ describe('samlp metadata', function () {
     it('sholud have the logout endpoint url', function(){
       expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Binding'))
         .to.equal('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect');
-        
+
       expect(doc.getElementsByTagName('SingleLogoutService')[0].getAttribute('Location'))
         .to.equal('http://localhost:5050/logout');
     });
@@ -76,6 +76,39 @@ describe('samlp metadata', function () {
     it('should not contain blank line', function(){
       expect(content)
         .to.not.contain('\n\s*\n');
+    });
+
+  });
+
+  describe('request to metadata with proxy', function () {
+    var doc;
+    before(function (done) {
+      request.get({
+        jar: request.jar(),
+        uri: 'http://localhost:5050/samlp/FederationMetadata/2007-06/FederationMetadata.xml',
+        headers: {
+          'X-Forwarded-Host': 'myserver.com'
+        }
+      }, function (err, response, b) {
+        if (err) return done(err);
+        doc = new xmldom.DOMParser().parseFromString(b).documentElement;
+        done();
+      });
+    });
+
+    it('sholud have the redirect endpoint url with the forwarded host', function () {
+      expect(doc.getElementsByTagName('SingleSignOnService')[0].getAttribute('Location'))
+        .to.equal('http://myserver.com/samlp/123');
+    });
+
+    it('sholud have the POST endpoint url with the forwarded host', function () {
+      expect(doc.getElementsByTagName('SingleSignOnService')[1].getAttribute('Location'))
+        .to.equal('http://myserver.com/login/callback');
+    });
+
+    it('sholud have the logout endpoint url with the forwarded host', function () {
+      expect(doc.getElementsByTagName('SingleLogoutService')[0].getAttribute('Location'))
+        .to.equal('http://myserver.com/logout');
     });
 
   });
