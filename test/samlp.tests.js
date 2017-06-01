@@ -123,6 +123,40 @@ describe('samlp', function () {
       expect(xmlhelper.getAuthnContextClassRef(signedAssertion).textContent)
         .to.equal('urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified');
     });
+
+    describe('logout SP initiated', function () {
+      var logoutResultValue;
+      // <?xml version="1.0"?>
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"></saml:NameID>
+      // </samlp:LogoutRequest>
+
+      before(function (done) {
+        request.get({
+          jar: request.jar(), 
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZDBTsMwDIbve4oq97R1Nsaw2k6TJqRJgwMgDtzS1IOKNilxihBPTyggVUhw%0AsWT7%2F2z%2FLrZvfZe8kufW2VJAmotttShY992AR%2FfoxnBDLyNxSKLQMk6dUoze%0AotPcMlrdE2MweLu7OqJKcxy8C864TsyQ%2FwnNTD7EC0Ry2JfiE%2FBSqdyc52ck%0ADcQAQGt5sdErSea0qmtDqyVsop55pIPloG0ohcphLUFJWN7BBnNAUA8iuf%2Bx%0AF3eJajKHE%2BerpxAGxiw7OVdrz%2BMwOB%2FSd7IN8XNqXF9kc%2FkXex0NHPbJpfO9%0ADn87gxSmStvI0yRF6nXb7ZrGE3M8JJtN%2B85%2BPb1afAA%3D%0A'
+        }, function (err, response, b){
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(200);
+
+          body = b;
+          $ = cheerio.load(body);
+          var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
+          var decoded = new Buffer(SAMLResponse, 'base64').toString();
+
+          signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(decoded)[1];
+          var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+          logoutResultValue = doc.documentElement.getAttribute('Value');
+
+          done();
+        });
+      });
+
+      it('should respond with a Success value', function () {
+        expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+      });
+    });
   });
 
   describe('SAMLRequest on querystring with a specific authnContextClassRef', function () {

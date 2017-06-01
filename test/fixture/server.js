@@ -54,6 +54,10 @@ module.exports.start = function(options, callback){
     callback(null, 'http://office.google.com');
   }
 
+  function getPostURLForLogout (logRequestData, req, callback) {
+    callback(null, 'http://office.google.com');
+  }
+
   //configure samlp middleware
   app.get('/samlp', function(req, res, next) {
     samlp.auth(xtend({}, {
@@ -67,6 +71,20 @@ module.exports.start = function(options, callback){
       } 
       next();
     });
+  });
+
+  app.get('/logout', function(req, res, next) {
+    samlp.logout(xtend({}, {
+        issuer:             'urn:fixture-test',
+        getPostURL:         getPostURLForLogout,
+        cert:               credentials.cert,
+        key:                credentials.key
+      }, module.exports.options))(req, res, function(err){
+        if (err) {
+          return res.send(400, err.message);
+        } 
+        next();
+      });
   });
 
   app.get('/samlp/FederationMetadata/2007-06/FederationMetadata.xml', samlp.metadata({
