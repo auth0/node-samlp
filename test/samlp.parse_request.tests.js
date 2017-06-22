@@ -99,23 +99,23 @@ describe('samlp parse response', function() {
       });
     });
 
-    describe.only('when request is not a malformed XML', function(){
-      // There was a bug in xmldom causing an infinite loop in this case
-      it('should return an empty object', function(done){
+    describe('when request is not a malformed XML', function(){
+      it('should return an error', function(done){
         const samlRequestPlain = '<samlp:AuthnRequest foo="bar"></test>';
         encodeAndDeflate(samlRequestPlain, function(err, req) {
           if (err) { return done(err); };
 
           samlp.parseRequest({
             query: {
-              SAMLRequest: new Buffer(req).toString('base64'),
+              SAMLRequest: req.toString('base64'),
               RelayState: '123'
             }
           }, {
             relayState: '123'
-          }, function(err, result) {console.log(err, result)
+          }, function(err, result) {
             expect(err).to.exist;
             expect(result).to.be.undefined;
+            expect(err.message).to.equal('end tag name: test is not match the current start tagName:undefined');
             done();
           });
 
