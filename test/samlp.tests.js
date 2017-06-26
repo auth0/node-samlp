@@ -597,7 +597,7 @@ describe('samlp', function () {
 
       it('should return signature with the specified signatureNamespacePrefix inside the response', function(){
         var doc = new xmldom.DOMParser().parseFromString(samlResponse);
-        var signature = doc.documentElement.getElementsByTagName('ds:Signature');
+        var signature = doc.documentElement.getElementsByTagName('Signature');
         expect(signature[0].parentNode.nodeName).to.equal('samlp:Response');
       });
     });
