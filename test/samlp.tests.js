@@ -62,7 +62,7 @@ describe('samlp', function () {
     
       var signature = doc.documentElement.getElementsByTagName('Signature');
 
-      expect('saml:Issuer', signature[0].previousSibling.nodeName);
+      expect(signature[0].previousSibling.nodeName).to.equal('saml:Issuer');
     });
 
     it('should use sha256 as default signature algorithm', function(){
