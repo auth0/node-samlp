@@ -1,7 +1,7 @@
 {
-  "name": "samlp",
-  "version": "3.3.0",
-  "description": "SAML Protocol server middleware",
+  "name": "tr-samlp",
+  "version": "3.3.1",
+  "description": "SAML Protocol server middleware - Fork for faster fixes.",
   "main": "lib/index.js",
   "scripts": {
     "test": "./node_modules/.bin/_mocha -R spec",
@@ -10,13 +10,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/auth0/node-samlp.git"
+    "url": "https://github.com/sameid/node-samlp.git"
   },
   "keywords": [
     "saml",
     "auth"
   ],
-  "author": "Auth0",
+  "author": ["Auth0", "Sameid Usmani <sameid.usmani@gmail.com>"],
   "license": "mit",
   "dependencies": {
     "ejs": "2.5.5",
