@@ -1,6 +1,6 @@
 {
   "name": "tr-samlp",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "SAML Protocol server middleware - Fork for faster fixes.",
   "main": "lib/index.js",
   "scripts": {
@@ -16,7 +16,10 @@
     "saml",
     "auth"
   ],
-  "author": ["Auth0", "Sameid Usmani <sameid.usmani@gmail.com>"],
+  "author": [
+    "Auth0",
+    "Sameid Usmani <sameid.usmani@gmail.com>"
+  ],
   "license": "mit",
   "dependencies": {
     "ejs": "2.5.5",
