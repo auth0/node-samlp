@@ -1,6 +1,6 @@
 {
   "name": "tr-samlp",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "SAML Protocol server middleware - Fork for faster fixes.",
   "main": "lib/index.js",
   "scripts": {
