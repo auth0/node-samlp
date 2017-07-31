@@ -3,6 +3,7 @@ var server = require('./fixture/server');
 var request = require('request');
 var cheerio = require('cheerio');
 var xmlhelper = require('./xmlhelper');
+var xmldom = require('xmldom');
 
 describe('samlp signed response', function () {
   before(function (done) {
@@ -56,5 +57,10 @@ describe('samlp signed response', function () {
       expect(destination).to.equal('http://destination');
     });
 
+    it('should have signature after issuer', function(){
+      var doc = new xmldom.DOMParser().parseFromString(signedResponse);
+      var signature = doc.documentElement.getElementsByTagName('Signature');
+      expect(signature[0].previousSibling.nodeName).to.equal('saml:Issuer');
+    });
   });
 });
