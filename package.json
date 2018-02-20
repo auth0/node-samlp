@@ -23,7 +23,7 @@
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
     "saml": "^0.12.1",
-    "thumbprint": "0.0.1",
+    "thumbprint": "ziluvatar/thumbprint#node6",
     "xml-crypto": "^0.10.1",
     "xmldom": "https://github.com/auth0/xmldom/tarball/master",
     "xpath": "0.0.5",
