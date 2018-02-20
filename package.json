@@ -25,7 +25,7 @@
     "saml": "^0.12.1",
     "thumbprint": "0.0.1",
     "xml-crypto": "^0.10.1",
-    "xmldom": "https://github.com/auth0/xmldom/tarball/master",
+    "xmldom": "auth0/xmldom#v0.1.19-auth0_1",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
