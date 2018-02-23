@@ -19,7 +19,7 @@
   "author": "Auth0",
   "license": "mit",
   "dependencies": {
-    "@auth0/thumbprint": "0.0.2",
+    "@auth0/thumbprint": "0.0.4",
     "ejs": "2.5.5",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
