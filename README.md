@@ -43,7 +43,7 @@ app.get('/samlp', samlp.auth({
   issuer:     'the-issuer',
   cert:       fs.readFileSync(path.join(__dirname, 'some-cert.pem')),
   key:        fs.readFileSync(path.join(__dirname, 'some-cert.key')),
-  getPostURL: function (wtrealm, wreply, req, callback) { 
+  getPostURL: function (wtrealm, wreply, req, callback) {
                 return callback( null, 'http://someurl.com')
               }
 }));
@@ -64,6 +64,8 @@ It also accept two optionals parameters:
 
 -  profileMapper: a class implementing the profile mapper. This is used to render the claims type information (using the metadata property). See [PassportProfileMapper](https://github.com/auth0/node-samlp/blob/master/lib/claims/PassportProfileMapper.js) for more information.
 -  endpointPath: this is the full path in your server to the auth route. By default the metadata handler uses the metadata request route without ```/FederationMetadata/2007..blabla.```
+
+*Note:* If `x-forwarded-host` or `x-forwarded-proto` are received during the HTTP request to the metadata endpoint the urls contained in the metadata will use those them as host or protocol respectively instead of the original ones from `request.headers.host` and `request.protocol`.
 
 ## Logout - SLO (Single Logout)
 Starting on version `v2.0` Single Logout is supported (SAML 2.0 Single Logout Profile). General support for SLO among Session Participants is varies a lot. This module supports the following flows:
