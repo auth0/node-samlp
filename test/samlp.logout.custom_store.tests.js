@@ -45,6 +45,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
   var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
   var testStore = new InMemoryStore();
+  var jar = request.jar();
 
   before(function (done) {
     server.start( { 
@@ -69,7 +70,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
   beforeEach(function (done) {
     request.get({
-      jar: request.jar(), 
+      jar: jar,
       uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
     }, function (err, response, b){
       if(err) return done(err);
@@ -113,7 +114,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8QwEIXvgv%2Bh5J6a6da1hra4sAiF1YMrHrxl06kUmqRmUujPN1tXWBWdwxzmvW%2FmwZSkzDDKnXtzU3jC9wkpJLMZLMlFqdjkrXSKepJWGSQZtNxvHnYyS4UcvQtOu4GdIf8Tigh96J1lSbOt2BHwPMuEvhHXyDXEBoBrfluonKPu8sNBY76CIvqJJmwsBWVDxTIBaw4Zh9UzFFKAhOyVJS%2FoKS6PcipYfXmRnKo8HpKPMU6zTe6dNyr8nRNSWCZ9y7vFKtGofti0rUciVnfO3eGszDhgqp0pr86W%2F7q5j0hM1NgW5xpO3m%2FDL%2BJT%2B%2FGL%2BgM%3D&Signature=CUwze47fZpFBtD7YRGyAzRyTrK7l8pxsg%2BiUan8N%2FVPAOOVYXcNElksrYrpZLPSAVhZbWlQYLJjuYxicY%2FVIG%2FiGjoNlPUMiAGsb4vfBumgDeShns22fdSYZ27hF0NL3%2FI%2FcUThvz4wCwcFb6XTmY101Wbew3gLVdBcsx17YwIns52TNmMjG0wsW9KtGZ4jrrZ1kGJ0rsDf5BL4jBIT5KgZYF2u4xOo2v6ysUPf3lG4ALRWqJFdAdkOVJ%2BdUO%2B47n57G4q1YcFDwoL%2BTM%2B02qXV1QwiTyMXttQI25DX4%2BEru2rAA7LN9F3KPabINu4vV%2FF9TAU2DBHCFNArcRDa%2FsA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
@@ -151,7 +152,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
@@ -387,7 +388,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout?SAMLRequest=fZFPS8NAEMXv%2FRRh75tm0lrr0AYLRQhUD1Y8eNtuphrM%2FnFnA8VP7zbFUgW97OHN782bxy5Ymc7jxr26Pj7SR08cs4PpLOMwWYo%2BWHSKW0arDDFGjdvV%2FQbLvEAfXHTadeLC8r9DMVOIrbMiq9dLcTQEWZaFvi6uSGpIDwDN5M1cTSXp%2FXS30zSdwDzxzD3VlqOycSnKAmYSSgmTJ5hjAQjli8ieKXBansZ5IapRli2OCThYQ%2FUWo2ccj%2FfO7VTg3nsXYv5JtiF%2Bz7Uzi%2FElfrY%2FpBr1Ortzwaj4dz%2FIYVDaRu4HFMmotls1TSBmUaXYWzoo4zu6CDstP4d53CY4dajTVYcKTtQvdfSt%2Fvi36gs%3D&Signature=asidjpasjdpasjndoubvuojewprjweprj&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, res){
@@ -415,7 +416,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
@@ -448,7 +449,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
@@ -519,7 +520,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       before(function (done) {
         request.get({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
@@ -609,7 +610,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           params.Signature = signature;
 
           request.get({
-            jar: request.jar(),
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             qs: params
@@ -687,7 +688,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -730,7 +731,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -786,7 +787,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       before(function (done) {
         // Session Participant 1 initiating logout. Sending LogoutRequest to IdP
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -844,7 +845,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
-            jar: request.jar(),
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
@@ -916,7 +917,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
       // </samlp:LogoutRequest>
       before(function (done) {
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -970,7 +971,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
         // Logout request sent by SP 1 to IdP
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -1005,7 +1006,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
-            jar: request.jar(),
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
@@ -1074,7 +1075,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         sessions.push(sessionParticipant2);
 
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
@@ -1108,7 +1109,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
-            jar: request.jar(),
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
@@ -1152,7 +1153,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
       before(function (done) {
         request.post({
-          jar: request.jar(),
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,

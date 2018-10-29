@@ -43,6 +43,7 @@ var sessionParticipant2 = {
 describe('samlp logout with Session Participants - Session Provider', function () {
   var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
+  var jar = request.jar();
   
   before(function (done) {
     server.start( { 
@@ -66,7 +67,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
   beforeEach(function (done) {
     request.get({
-      jar: request.jar(), 
+      jar: jar,
       uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
     }, function (err, response, b){
       if(err) return done(err);
@@ -109,6 +110,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       before(function (done) {
         request.get({
           followRedirect: false,
+          jar: jar,
           uri: 'http://localhost:5050/logout?SAMLRequest=fZFBS8QwEIXvgv%2Bh5J6a6da1hra4sAiF1YMrHrxl06kUmqRmUujPN1tXWBWdwxzmvW%2FmwZSkzDDKnXtzU3jC9wkpJLMZLMlFqdjkrXSKepJWGSQZtNxvHnYyS4UcvQtOu4GdIf8Tigh96J1lSbOt2BHwPMuEvhHXyDXEBoBrfluonKPu8sNBY76CIvqJJmwsBWVDxTIBaw4Zh9UzFFKAhOyVJS%2FoKS6PcipYfXmRnKo8HpKPMU6zTe6dNyr8nRNSWCZ9y7vFKtGofti0rUciVnfO3eGszDhgqp0pr86W%2F7q5j0hM1NgW5xpO3m%2FDL%2BJT%2B%2FGL%2BgM%3D&Signature=CUwze47fZpFBtD7YRGyAzRyTrK7l8pxsg%2BiUan8N%2FVPAOOVYXcNElksrYrpZLPSAVhZbWlQYLJjuYxicY%2FVIG%2FiGjoNlPUMiAGsb4vfBumgDeShns22fdSYZ27hF0NL3%2FI%2FcUThvz4wCwcFb6XTmY101Wbew3gLVdBcsx17YwIns52TNmMjG0wsW9KtGZ4jrrZ1kGJ0rsDf5BL4jBIT5KgZYF2u4xOo2v6ysUPf3lG4ALRWqJFdAdkOVJ%2BdUO%2B47n57G4q1YcFDwoL%2BTM%2B02qXV1QwiTyMXttQI25DX4%2BEru2rAA7LN9F3KPabINu4vV%2FF9TAU2DBHCFNArcRDa%2FsA%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
           if(err) return done(err);
@@ -144,6 +146,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       before(function (done) {
         request.get({
           followRedirect: false,
+          jar: jar,
           uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
           if(err) return done(err);
@@ -203,6 +206,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       before(function (done) {
         request.get({
           followRedirect: false,
+          jar: jar,
           uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         }, function (err, response){
           if(err) return done(err);
@@ -290,6 +294,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
           request.get({
             followRedirect: false,
+            jar: jar,
             uri: 'http://localhost:5050/logout',
             qs: params
           }, function (err, response) {
@@ -571,6 +576,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
       before(function (done) {
         request.get({
+          jar: jar,
           followRedirect: false,
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
@@ -653,11 +659,12 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
           };
 
-          // We need to sign the reponse here          
+          // We need to sign the reponse here
           var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
           params.Signature = signature;
-          
+
           request.get({
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             qs: params
@@ -829,6 +836,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
+          jar: jar,
           body: {
             SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
@@ -883,6 +891,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
@@ -892,6 +901,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             }
           }, function (err, response) {
             if (err) { return done(err); }
+            expect(response.statusCode).to.eq(200);
             $ = cheerio.load(response.body);
             SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
             sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');        
@@ -1008,6 +1018,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         // Logout request sent by SP 1 to IdP
         request.post({
           followRedirect: false,
+          jar: jar,
           uri: 'http://localhost:5050/logout',
           json: true,
           body: {
@@ -1038,6 +1049,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
@@ -1050,7 +1062,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             expect(response.statusCode).to.equal(200);
             $ = cheerio.load(response.body);
             SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');        
+            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');
             sessionParticipantLogoutResponse = new Buffer(SAMLResponse, 'base64').toString();
             done();
           });
@@ -1108,6 +1120,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           followRedirect: false,
           uri: 'http://localhost:5050/logout',
           json: true,
+          jar: jar,
           body: {
             SAMLRequest: 'PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8c2FtbHA6TG9nb3V0UmVxdWVzdCB4bWxuczpzYW1scD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBJRD0icGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIiBJc3N1ZUluc3RhbnQ9IjIwMTYtMTItMTNUMTg6MDE6MTJaIiBWZXJzaW9uPSIyLjAiPg0KICAgICAgICA8c2FtbDpJc3N1ZXI+aHR0cHM6Ly9mb29iYXJzdXBwb3J0LnplbmRlc2suY29tPC9zYW1sOklzc3Vlcj48ZHM6U2lnbmF0dXJlIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj4NCiAgPGRzOlNpZ25lZEluZm8+PGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz4NCiAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI3JzYS1zaGExIi8+DQogIDxkczpSZWZlcmVuY2UgVVJJPSIjcGZ4NmZlNjU3ZTMtMWE3Zi04OTNlLWY2OTAtZjdmYzUxNjJlYTExIj48ZHM6VHJhbnNmb3Jtcz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI2VudmVsb3BlZC1zaWduYXR1cmUiLz48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIi8+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjc2hhMSIvPjxkczpEaWdlc3RWYWx1ZT55SnpIbmRqL3NuaVJzTG1kcHFSZ0Yvdmp6L0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+PGRzOlNpZ25hdHVyZVZhbHVlPk56bU42R0RLcHNpMVU4NndaTXNjWjY2aExHNDVhMzhhMGhvaCtpdFdCTWQzNS9RMnF1Y2N2NEJaTGhSbU1xYmFIL3l4VnZ4bWUvWXExR24xbEkrVlpwZkZsYURXQnZTcXUxdWJVemVEbEtVUDdHUmVnakNSTFErSkhxZnQ2aHRDdENQdkttQ0NTaVNEVlZydmcvc0ZLVXBuVDhPWEhkK25ENDBLSVQ4NHQ2OERiM2pTN3g2amx6VDMzYk1Vdm83dVNFUDVnSnFUbG9RMVVWY280WmszUGVxK0tDOWF6TUFkVHVnMWZZRDJXVWtXOEZCd084b1ZBUWpDMGo4VkVyVVpiUUpRS2hhdTMxcjNVcU1VUExNS0NJaFZxZ0tPRVd6MWt1a1NWY2MzdTJjR0owT1FJU093N0xQbkRDSTdPclVMaGU4NEJESTMzR01JMDNXazFMNG5Mdz09PC9kczpTaWduYXR1cmVWYWx1ZT4NCjxkczpLZXlJbmZvPjxkczpYNTA5RGF0YS8+PC9kczpLZXlJbmZvPjwvZHM6U2lnbmF0dXJlPg0KICAgICAgICA8c2FtbDpOYW1lSUQgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoxLjE6bmFtZWlkLWZvcm1hdDplbWFpbEFkZHJlc3MiPmZvb0BleGFtcGxlLmNvbTwvc2FtbDpOYW1lSUQ+DQogICAgICAgIDxzYW1sOlNlc3Npb25JbmRleD4xPC9zYW1sOlNlc3Npb25JbmRleD4NCiAgICAgIDwvc2FtbHA6TG9nb3V0UmVxdWVzdD4=',
             RelayState: '123'
@@ -1139,6 +1152,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           //     </samlp:Status>
           // </samlp:LogoutResponse>
           request.post({
+            jar: jar,
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
             json: true,
