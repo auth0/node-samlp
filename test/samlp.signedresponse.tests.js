@@ -18,7 +18,7 @@ describe('samlp signed response', function () {
   });
 
   describe('SAMLRequest on querystring', function () {
-    var body, $, signedResponse, attributes;
+    var body, $, signedResponse, signedAssertion;
 
     before(function (done) {
       request.get({
@@ -31,6 +31,7 @@ describe('samlp signed response', function () {
         var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
         var decoded = new Buffer(SAMLResponse, 'base64').toString();
         signedResponse = /(<samlp:Response.*<\/samlp:Response>)/.exec(decoded)[1];
+        signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(decoded)[1];
         done();
       });
     });
@@ -41,6 +42,13 @@ describe('samlp signed response', function () {
                 server.credentials.cert);
       expect(isValid).to.be.ok;
     });
+
+    it('should contain a valid signed assertion', function() {
+      var isValid = xmlhelper.verifySignature(
+                signedAssertion,
+                server.credentials.cert);
+      expect(isValid).to.be.ok;
+    })
 
     it('should use sha256 as default signature algorithm', function(){
       var algorithm = xmlhelper.getSignatureMethodAlgorithm(signedResponse);
