@@ -25,7 +25,7 @@
     "querystring": "^0.2.0",
     "saml": "^0.12.1",
     "xml-crypto": "^0.10.1",
-    "xmldom": "auth0/xmldom#v0.1.19-auth0_1",
+    "xmldom": "https://github.com/auth0/xmldom/archive/v0.1.19-auth0_1.tar.gz",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
