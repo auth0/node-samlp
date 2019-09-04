@@ -47,7 +47,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
   var samlIdPIssuer = 'urn:fixture-test';
   var testStore = new InMemoryStore();
 
-  let frozenTime;
+  var frozenTime;
   before(() => {
     frozenTime = new Date(Date.now());
     timekeeper.freeze(frozenTime)
