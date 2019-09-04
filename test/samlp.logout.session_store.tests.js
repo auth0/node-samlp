@@ -11,6 +11,7 @@ var signers       = require('../lib/signers');
 var fs            = require('fs');
 var path          = require('path');
 var SPs           = require('../lib/sessionParticipants');
+const timekeeper  = require('timekeeper');
 
 var sp1_credentials = {
   cert:     fs.readFileSync(path.join(__dirname, 'fixture', 'sp1.pem')),
@@ -44,6 +45,14 @@ describe('samlp logout with Session Participants - Session Provider', function (
   var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
   
+  let frozenTime;
+  before(() => {
+    frozenTime = new Date(Date.now());
+    timekeeper.freeze(frozenTime)
+  });
+
+  after(() => timekeeper.reset());
+
   before(function (done) {
     server.start( { 
       audience: 'https://auth0-dev-ed.my.salesforce.com',
@@ -230,6 +239,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       it('should validate LogoutRequest to Session Participant', function () {
         expect(sessionParticipantLogoutRequest).to.exist;
         expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
@@ -317,6 +327,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
+          expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
           expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
           expect(xmlhelper.getInResponseTo(sessionParticipantLogoutResponse)).to.equal('samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318');
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
@@ -530,6 +541,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       it('should validate LogoutRequest to Session Participant', function () {
         expect(sessionParticipantLogoutRequest).to.exist;
         expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
@@ -599,6 +611,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       it('should validate LogoutRequest to Session Participant', function () {
         expect(sessionParticipantLogoutRequest).to.exist;
         expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
@@ -686,6 +699,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         it('should validate LogoutRequest to Session Participant 2', function () {
           expect(sessionParticipant2LogoutRequest).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipant2LogoutRequest)).to.exist;
+          expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
           expect(xmlhelper.getDestination(sessionParticipant2LogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
           expect(xmlhelper.getConsent(sessionParticipant2LogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
           expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
@@ -849,6 +863,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       it('should validate LogoutRequest to Session Participant', function () {
         expect(sessionParticipantLogoutRequest).to.exist;
         expect(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).to.exist;
+        expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
@@ -903,6 +918,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         it('should validate LogoutResponse to the Session Participant that initiated the logout', function () {
           expect(sessionParticipantLogoutResponse).to.exist;
           expect(xmlhelper.getIssueInstant(sessionParticipantLogoutResponse)).to.exist;
+          expect(new Date(xmlhelper.getIssueInstant(sessionParticipantLogoutRequest)).getTime()).to.equal(frozenTime.getTime());
           expect(xmlhelper.getDestination(sessionParticipantLogoutResponse)).to.equal(sessionParticipant1.serviceProviderLogoutURL); 
           expect(xmlhelper.getInResponseTo(sessionParticipantLogoutResponse)).to.equal('pfx6fe657e3-1a7f-893e-f690-f7fc5162ea11');
           expect(xmlhelper.getIssuer(sessionParticipantLogoutResponse)).to.equal(samlIdPIssuer);
