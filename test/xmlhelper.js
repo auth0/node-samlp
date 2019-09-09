@@ -88,6 +88,14 @@ exports.getIssueInstant = function(assertion) {
   return doc.documentElement.getAttribute('IssueInstant');
 };
 
+/**
+ * @param {String} assertion
+ * @return {number} the instant in milliseconds since the Epoch
+ */
+exports.getIssueInstantUTC = function(assertion) {
+  return new Date(exports.getIssueInstant(assertion)).getTime();
+};
+
 exports.getConditions = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement.getElementsByTagName('saml:Conditions');
