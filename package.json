@@ -1,6 +1,6 @@
 {
   "name": "vrkkpa-samlp",
-  "version": "3.4.3",
+  "version": "3.4.3-sf1.0",
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
@@ -24,8 +24,8 @@
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
     "saml": "^0.12.1",
+    "vrkkpa-xmldom": "^0.1.19-auth0.3-sf1.0",
     "xml-crypto": "^0.10.1",
-    "xmldom": "https://github.com/auth0/xmldom/archive/v0.1.19-auth0_1.tar.gz",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
