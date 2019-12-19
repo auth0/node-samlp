@@ -63,7 +63,7 @@ module.exports.start = function(options, callback){
       key:                credentials.key
     }, module.exports.options))(req, res, function(err){
       if (err) {
-        return res.send(400, err.message);
+        return res.send(err.status || 400, err.message);
       } 
       next();
     });
@@ -85,7 +85,7 @@ module.exports.start = function(options, callback){
       key:                credentials.key
     }, module.exports.options))(req, res, function (err) {
       if (err) {
-        return res.send(400, err.message);
+        return res.send(err.status || 400, err.message);
       } 
       next();
     });
@@ -99,10 +99,14 @@ module.exports.start = function(options, callback){
       key:                credentials.key
     }, module.exports.options))(req, res, function (err) {
       if (err) {
-        return res.send(400, err.message);
+        return res.send(err.status || 400, err.message);
       } 
       next();
     });
+  });
+
+  app.use(function (error, req, res, next) {
+    return res.status(error.status || 500).send(error.message);
   });
 
   var server = http.createServer(app).listen(5050, callback);
