@@ -7,7 +7,7 @@
     xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
   <saml:Issuer><%= Issuer %></saml:Issuer>
-  <saml:NameID
+  <saml:NameID>
 <% if (NameID.NameQualifier) { %> NameQualifier="<%= NameID.NameQualifier %>"<% } -%>
 <% if (NameID.SPNameQualifier) { %> SPNameQualifier="<%= NameID.SPNameQualifier %>"<% } -%>
 <% if (NameID.Format) { %> Format="<%= NameID.Format %>"<% } -%>
