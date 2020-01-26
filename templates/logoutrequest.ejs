@@ -4,9 +4,10 @@
     IssueInstant="<%= IssueInstant %>"
     Destination="<%= Destination %>"
     Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified"
-    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
-  <saml:Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion"><%= Issuer %></saml:Issuer>
-  <saml:NameID xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+  <saml:Issuer><%= Issuer %></saml:Issuer>
+  <saml:NameID
 <% if (NameID.NameQualifier) { %> NameQualifier="<%= NameID.NameQualifier %>"<% } -%>
 <% if (NameID.SPNameQualifier) { %> SPNameQualifier="<%= NameID.SPNameQualifier %>"<% } -%>
 <% if (NameID.Format) { %> Format="<%= NameID.Format %>"<% } -%>
