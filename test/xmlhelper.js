@@ -129,7 +129,7 @@ exports.getNameIdentifier = function(assertion) {
 exports.getNameIdentifierFormat = function(assertion) {
   var doc = new xmldom.DOMParser().parseFromString(assertion);
   return doc.documentElement
-            .getElementsByTagName('NameID')[0]
+            .getElementsByTagName('saml:NameID')[0]
             .getAttribute('Format');
 };
 

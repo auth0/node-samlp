@@ -252,8 +252,8 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         expect(xmlhelper.getIssueInstantUTC(sessionParticipantLogoutRequest)).to.equal(frozenTime);
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:NameID')).to.equal(sessionParticipant2.nameId);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
       });
 
@@ -487,8 +487,8 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         expect(xmlhelper.getIssueInstantUTC(sessionParticipantLogoutRequest)).to.equal(frozenTime);
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant1.nameId);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:NameID')).to.equal(sessionParticipant1.nameId);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant1.sessionIndex);
       });
 
@@ -559,8 +559,8 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         expect(xmlhelper.getIssueInstantUTC(sessionParticipantLogoutRequest)).to.equal(frozenTime);
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant1.nameId);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:NameID')).to.equal(sessionParticipant1.nameId);
         expect(xmlhelper.getNameIdentifierFormat(sessionParticipantLogoutRequest)).to.equal(sessionParticipant1.nameIdFormat);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant1.sessionIndex);
       });
@@ -649,8 +649,8 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
           expect(xmlhelper.getIssueInstantUTC(sessionParticipant2LogoutRequest)).to.equal(frozenTime);
           expect(xmlhelper.getDestination(sessionParticipant2LogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
           expect(xmlhelper.getConsent(sessionParticipant2LogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
-          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
+          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'saml:Issuer')).to.equal(samlIdPIssuer);
+          expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'saml:NameID')).to.equal(sessionParticipant2.nameId);
           expect(xmlhelper.getElementText(sessionParticipant2LogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
         });
 
@@ -821,8 +821,8 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
         expect(xmlhelper.getIssueInstantUTC(sessionParticipantLogoutRequest)).to.equal(frozenTime);
         expect(xmlhelper.getDestination(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.serviceProviderLogoutURL);
         expect(xmlhelper.getConsent(sessionParticipantLogoutRequest)).to.equal('urn:oasis:names:tc:SAML:2.0:consent:unspecified');
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'Issuer')).to.equal(samlIdPIssuer);
-        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'NameID')).to.equal(sessionParticipant2.nameId);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:Issuer')).to.equal(samlIdPIssuer);
+        expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'saml:NameID')).to.equal(sessionParticipant2.nameId);
         expect(xmlhelper.getNameIdentifierFormat(sessionParticipantLogoutRequest)).to.equal(sessionParticipant2.nameIdFormat);
         expect(xmlhelper.getElementText(sessionParticipantLogoutRequest, 'samlp:SessionIndex')).to.equal(sessionParticipant2.sessionIndex);
       });
