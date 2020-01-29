@@ -1,6 +1,6 @@
 var expect        = require('chai').expect;
 var server        = require('./fixture/server');
-var request       = require('request');
+var request       = require('request').defaults({ jar:true  });
 var cheerio       = require('cheerio');
 var xmldom        = require('xmldom');
 var xmlhelper     = require('./xmlhelper');
