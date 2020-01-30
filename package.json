@@ -1,6 +1,6 @@
 {
   "name": "vrkkpa-samlp",
-  "version": "3.4.3-sf1.0",
+  "version": "3.4.3-sf1.1",
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "ejs": "2.5.5",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
-    "saml": "^0.12.1",
+    "saml": "^0.14",
     "vrkkpa-xmldom": "^0.1.19-auth0.3-sf1.0",
     "xml-crypto": "^0.10.1",
     "xpath": "0.0.5",
@@ -33,11 +33,12 @@
     "body-parser": "^1.15.2",
     "chai": "~1.5.0",
     "cheerio": "~0.10.7",
-    "express": "~3.1.0",
+    "express": "^4.17.1",
     "express-session": "^1.14.2",
     "istanbul": "^0.4.5",
-    "mocha": "~1.8.1",
-    "request": "~2.14.0",
+    "mocha": "~7.0.1",
+    "request": "~2.88.0",
+    "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
   }
 }
