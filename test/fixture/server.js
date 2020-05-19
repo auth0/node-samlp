@@ -41,14 +41,12 @@ module.exports.start = function(options, callback){
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.json());
 
-  app.configure(function(){
-    this.use(function(req,res,next){
+    app.use(function(req,res,next){
       req.user = fakeUser;
       next();
     });
 
-    this.use(expressSession({secret:'somesecrettokenhere'}));
-  });
+    app.use(expressSession({secret:'somesecrettokenhere'}));
 
   function getPostURL (wtrealm, wreply, req, callback) {
     callback(null, 'http://office.google.com');
