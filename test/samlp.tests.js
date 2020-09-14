@@ -640,6 +640,99 @@ describe('samlp', function () {
     });
   });
 
+  describe('response signing', function () {
+    function doSAMLRequest(testSamlResponse) {
+      request.get({
+        jar: request.jar(),
+        uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
+      }, function (err, response, body) {
+        expect(err).to.equal(null);
+        expect(response.statusCode).to.equal(200);
+
+        var SAMLResponse = cheerio.load(body)('input[name="SAMLResponse"]').attr('value');
+        var samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+        var doc = new xmldom.DOMParser().parseFromString(samlResponse);
+        testSamlResponse(doc);
+      });
+    }
+
+    describe('signResponse=true and signAssertion=true', function () {
+      before(function () {
+        server.options = { signatureNamespacePrefix: 'ds', signResponse: true, signAssertion: true };
+      });
+
+      it('should sign the response and the assertion', function (done) {
+        doSAMLRequest(function (samlResponse) {
+          var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
+          expect(signatures).to.have.lengthOf(2);
+          expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
+          expect(signatures[1].parentNode.nodeName).to.equal('saml:Assertion');
+          done();
+        });
+      });
+    });
+
+    describe('signResponse=true and signAssertion is undefined', function () {
+      before(function () {
+        server.options = { signatureNamespacePrefix: 'ds', signResponse: true }; // for backward compatibility
+      });
+
+      it('should sign the response and not the assertion', function (done) {
+        doSAMLRequest(function (samlResponse) {
+          var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
+          expect(signatures).to.have.lengthOf(1);
+          expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
+          done();
+        });
+      });
+    });
+
+    describe('signResponse=true and signAssertion=false', function () {
+      before(function () {
+        server.options = { signatureNamespacePrefix: 'ds', signResponse: true, signAssertion: false };
+      });
+
+      it('should sign the response and not the assertion', function (done) {
+        doSAMLRequest(function (samlResponse) {
+          var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
+          expect(signatures).to.have.lengthOf(1);
+          expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
+          done();
+        });
+      });
+    });
+
+    describe('signResponse=false and signAssertion=true', function () {
+      before(function () {
+        server.options = { signatureNamespacePrefix: 'ds', signResponse: false, signAssertion: true };
+      });
+
+      it('should sign the assertion and not the response', function (done) {
+        doSAMLRequest(function (samlResponse) {
+          var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
+          expect(signatures).to.have.lengthOf(1);
+          expect(signatures[0].parentNode.nodeName).to.equal('saml:Assertion');
+          done();
+        });
+      });
+    });
+
+    describe('signResponse and signAssertion are both undefined', function () {
+      before(function () {
+        server.options = { signatureNamespacePrefix: 'ds' };
+      });
+
+      it('should sign the assertion and not the response', function (done) {
+        doSAMLRequest(function (samlResponse) {
+          var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
+          expect(signatures).to.have.lengthOf(1);
+          expect(signatures[0].parentNode.nodeName).to.equal('saml:Assertion');
+          done();
+        });
+      });
+    });
+  });
+
   describe('configured signature signatureNamespacePrefix', function(){
     describe('signResponse = true', function(){
       var body, $, signedAssertion, samlResponse;
