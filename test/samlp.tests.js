@@ -677,11 +677,12 @@ describe('samlp', function () {
         server.options = { signatureNamespacePrefix: 'ds', signResponse: true }; // for backward compatibility
       });
 
-      it('should sign the response and not the assertion', function (done) {
+      it('should sign the response and the assertion', function (done) {
         doSAMLRequest(function (samlResponse) {
           var signatures = samlResponse.documentElement.getElementsByTagName('ds:Signature');
-          expect(signatures).to.have.lengthOf(1);
+          expect(signatures).to.have.lengthOf(2);
           expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
+          expect(signatures[1].parentNode.nodeName).to.equal('saml:Assertion');
           done();
         });
       });
