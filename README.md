@@ -31,6 +31,8 @@ Options
 | profileMapper       | mapper to map users to claims (see PassportProfileMapper)| PassportProfileMapper |
 | signatureAlgorithm  | signature algorithm, options: rsa-sha1, rsa-sha256 | ```'rsa-sha256'``` |
 | digestAlgorithm     | digest algorithm, options: sha1, sha256          | ```'sha256'``` |
+| signResponse        | whether to sign the SAML response                | false                                        |
+| signAssertion       | whether to sign the SAML assertion               | true                                         |
 | RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
 | sessionIndex          | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
 | responseHandler       | custom response handler for SAML response f(SAMLResponse, options, req, res, next) | HTML response that POSTS to postUrl |
