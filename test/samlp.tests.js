@@ -641,15 +641,23 @@ describe('samlp', function () {
   });
 
   describe('response signing', function () {
-    function doSAMLRequest(testSamlResponse) {
+
+    function doRawSAMLRequest(testResponse) {
       request.get({
         jar: request.jar(),
         uri: 'http://localhost:5050/samlp?SAMLRequest=fZBPb4MwDMW%2FSuQ7fxrYhCygYqumVeo0VOgOu2U0WpEgYXGo9vGXwdDaS2%2BO7fi990vX333HztJQq1UGKz8EJlWjj636zOBQP3kJrPOURN8NWIz2pPbya5RkmfunCKdBBqNRqAW1hEr0ktA2WBUvO%2BR%2BiIPRVje6A1YQSWOd0KNWNPbSVNKc20Ye9rsMTtYOhEEgGgK2cQqtEnYytUyO%2F01g241zy6P4zpVEo9wqskLZDHi4irww9nhSc45xhDH3o%2BT%2BHVj5Z%2BShVXO8W64%2F5iXC57ouvfK1qoG9LZjcAsxQcBI3FzRunxULAsh%2FY7lUNKTBxaV8fl3Dzn8A&RelayState=123'
-      }, function (err, response, body) {
+      }, function (err, response) {
         expect(err).to.equal(null);
+
+        testResponse(response);
+      });
+    }
+
+    function doSAMLRequest(testSamlResponse) {
+      doRawSAMLRequest(function(response) {
         expect(response.statusCode).to.equal(200);
 
-        var SAMLResponse = cheerio.load(body)('input[name="SAMLResponse"]').attr('value');
+        var SAMLResponse = cheerio.load(response.body)('input[name="SAMLResponse"]').attr('value');
         var samlResponse = new Buffer(SAMLResponse, 'base64').toString();
         var doc = new xmldom.DOMParser().parseFromString(samlResponse);
         testSamlResponse(doc);
@@ -668,6 +676,20 @@ describe('samlp', function () {
           expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
           expect(signatures[1].parentNode.nodeName).to.equal('saml:Assertion');
           done();
+        });
+      });
+
+      describe('when invalid signing key is used', function () {
+        before(function () {
+          server.options.key = 'invalid_signing_key';
+        });
+
+        it('should return an error', function (done) {
+          doRawSAMLRequest(function (response) {
+            expect(response.statusCode).to.equal(400);
+            expect(response.body).to.equal('error:0909006C:PEM routines:get_name:no start line');
+            done();
+          });
         });
       });
     });
@@ -699,6 +721,20 @@ describe('samlp', function () {
           expect(signatures).to.have.lengthOf(1);
           expect(signatures[0].parentNode.nodeName).to.equal('samlp:Response');
           done();
+        });
+      });
+
+      describe('when invalid signing key is used', function () {
+        before(function () {
+          server.options.key = 'invalid_signing_key';
+        });
+
+        it('should return an error', function (done) {
+          doRawSAMLRequest(function (response) {
+            expect(response.statusCode).to.equal(400);
+            expect(response.body).to.equal('error:0909006C:PEM routines:get_name:no start line');
+            done();
+          });
         });
       });
     });
