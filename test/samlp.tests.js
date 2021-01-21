@@ -729,6 +729,10 @@ describe('samlp', function () {
           server.options.key = 'invalid_signing_key';
         });
 
+        after(function () {
+          delete server.options.key;
+        });
+
         it('should return an error', function (done) {
           doRawSAMLRequest(function (response) {
             expect(response.statusCode).to.equal(400);
