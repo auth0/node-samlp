@@ -687,7 +687,7 @@ describe('samlp', function () {
         it('should return an error', function (done) {
           doRawSAMLRequest(function (response) {
             expect(response.statusCode).to.equal(400);
-            expect(response.body).to.equal('error:0909006C:PEM routines:get_name:no start line');
+            expect(response.body).to.match(/error:\w+:PEM routines:\w+:no start line/);
             done();
           });
         });
@@ -736,7 +736,7 @@ describe('samlp', function () {
         it('should return an error', function (done) {
           doRawSAMLRequest(function (response) {
             expect(response.statusCode).to.equal(400);
-            expect(response.body).to.equal('error:0909006C:PEM routines:get_name:no start line');
+            expect(response.body).to.match(/error:\w+:PEM routines:\w+:no start line/);
             done();
           });
         });
