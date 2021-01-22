@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/_mocha -R spec",
     "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha",
-    "open_cover": "open coverage/lcov-report/*.html"
+    "open_cover": "open coverage/lcov-report/*.html",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,8 @@
     "ejs": "2.5.5",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
-    "saml": "^0.15.0-rc.0",
+    "saml": "^1.0.0",
+    "standard-version": "^9.1.0",
     "xml-crypto": "^2.0.0",
     "xmldom": "auth0/xmldom#v0.1.19-auth0_1",
     "xpath": "0.0.5",
@@ -33,10 +35,10 @@
     "body-parser": "^1.15.2",
     "chai": "^4.2.0",
     "cheerio": "~0.10.7",
-    "express": "^3.11.0",
+    "cheerio-select": "~0.0.3",
+    "express": "^4.17.1",
     "express-session": "^1.14.2",
-    "istanbul": "^0.4.5",
-    "mocha": "~1.8.1",
+    "mocha": "~8.2.1",
     "request": "~2.88.0",
     "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
