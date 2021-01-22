@@ -4,5 +4,3 @@ node_js:
   - 10.16.0
   - 12.10.0
   - 14.15.4
-before_install:
-  - npm i -g npm@5
