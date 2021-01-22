@@ -1,6 +1,10 @@
 name: Library CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   build:
@@ -21,6 +25,6 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      
+
     - name: Install dependencies      
       run: npm test
