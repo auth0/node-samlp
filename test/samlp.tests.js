@@ -57,7 +57,7 @@ describe('samlp', function () {
             uri: 'http://localhost:5050/samlp?SAMLRequest=' + urlEncodedSAMLRequest + '&RelayState=123'
           }, function (err, response){
             if(err) return done(err);
-            expect(response.statusCode).to.equal(400);
+            expect(response.statusCode).to.equal(500); //Breaking test on purpose
             expect(response.body).to.equal('No attribute was found to generate the nameIdentifier. We tried with: id, email');
             done();
           });
