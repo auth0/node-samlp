@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Library CI
 
 on: [push, pull_request]
 
@@ -13,10 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
     - name: Install dependencies
-    - run: npm install
-    - run: npm test
+      run: npm install
+      
+    - name: Install dependencies      
+      run: npm test
