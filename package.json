@@ -6,7 +6,7 @@
   "scripts": {
     "test": "./node_modules/.bin/_mocha -R spec --colors",
     "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec --colors",
-    "open_cover": "open coverage/lcov-report/*.html"
+    "open_cover": "open coverage/lcov-report/*.html",
     "release": "standard-version"
   },
   "repository": {
