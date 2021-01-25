@@ -4,9 +4,9 @@
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
-    "test": "./node_modules/.bin/_mocha -R spec",
-    "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha",
-    "open_cover": "open coverage/lcov-report/*.html",
+    "test": "./node_modules/.bin/_mocha -R spec --colors",
+    "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec --colors",
+    "open_cover": "open coverage/lcov-report/*.html"
     "release": "standard-version"
   },
   "repository": {
@@ -39,6 +39,7 @@
     "cheerio-select": "~0.0.3",
     "express": "^4.17.1",
     "express-session": "^1.14.2",
+    "istanbul": "^0.4.5",
     "mocha": "~8.2.1",
     "request": "~2.88.0",
     "timekeeper": "^2.2.0",
