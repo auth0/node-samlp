@@ -21,6 +21,7 @@
   "license": "mit",
   "dependencies": {
     "@auth0/thumbprint": "0.0.6",
+    "auth0-id-generator": "^0.2.0",
     "ejs": "2.5.5",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
