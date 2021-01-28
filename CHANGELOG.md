@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [5.0.1](https://github.com/auth0/node-samlp/compare/v5.0.0-rc.1...v5.0.1) (2021-01-28)
 
+* switch id generation to id-generator library
 
 ### Bug Fixes
 
