@@ -25,7 +25,6 @@
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
     "saml": "^1.0.0",
-    "standard-version": "^9.1.0",
     "xml-crypto": "^2.0.0",
     "xmldom": "auth0/xmldom#v0.1.19-auth0_1",
     "xpath": "0.0.5",
@@ -41,6 +40,7 @@
     "istanbul": "^0.4.5",
     "mocha": "~8.2.1",
     "request": "~2.88.0",
+    "standard-version": "^9.1.0",
     "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
   }
