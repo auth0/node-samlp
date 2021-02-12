@@ -366,7 +366,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
     });
 
     describe('SP initiated - LogoutRequest with multiple SessionIndex elements', function () {
-      var logoutResultValue, RelayState;
+      let logoutResultValue;
 
       before(function () {
         sessions.splice(0);
@@ -390,16 +390,15 @@ describe('samlp logout with Session Participants - Session Provider', function (
         }, function (err, response){
           if(err) return done(err);
           expect(response.statusCode).to.equal(302);
-          var qs = require('querystring');
-          var i = response.headers.location.indexOf('SAMLResponse=');
-          var query = qs.parse(response.headers.location.substr(i));
-          var SAMLResponse = query.SAMLResponse;
-          RelayState = query.RelayState;
+          const qs = require('querystring');
+          const i = response.headers.location.indexOf('SAMLResponse=');
+          const query = qs.parse(response.headers.location.substr(i));
+          const SAMLResponse = query.SAMLResponse;
           
-          zlib.inflateRaw(new Buffer(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
+          zlib.inflateRaw(Buffer.from(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
             if(err) return done(err);
             signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(decodedAndInflated)[1];
-            var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+            const doc = new xmldom.DOMParser().parseFromString(signedAssertion);
             logoutResultValue = doc.documentElement.getAttribute('Value');
 
             done();
