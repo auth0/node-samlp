@@ -365,6 +365,56 @@ describe('samlp logout with Session Participants - Session Provider', function (
       });
     });
 
+    describe('SP initiated - LogoutRequest with multiple SessionIndex elements', function () {
+      let logoutResultValue;
+
+      before(function () {
+        sessions.splice(0);
+        sessions.push(sessionParticipant1);
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+      //   <samlp:SessionIndex>not-the-session-index</samlp:SessionIndex>
+      //   <samlp:SessionIndex>1</samlp:SessionIndex>
+      // </samlp:LogoutRequest>
+      before(function (done) {
+        request.get({
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout?SAMLRequest=fZHNTsMwEIRfJfLdSTYtpazaiEoVUqTCARAHbq6zpRHxD15Hqnh63ORSocLFh9n5ZnblFSvTe9y5DzfEZ%2FoaiGN2Mr1lHCdrMQSLTnHHaJUhxqjxZfO4wyov0QcXnXa9uED%2BJxQzhdg5K7JmuxZnIMiqKvVteUNSQ3oAaCHvlmouSR%2Fm%2B72m%2BQyWyc88UGM5KhvXoiphIaGSMHuFJZaAUL2L7I0Cp%2FA0zktRr87xOHKhPsboGYvi4NxeBR68dyHm32Rb4s9cO7MqLu0T%2B5QOaLbZgwtGxb8vgxxGpWvlYbQiGdX1m7YNxCzq1HlPJ2V8TxdNU%2FjU5PElOdPqTdrnVFsXZTyS5EmU3VmdsF%2FOazRcdxZX%2Frr%2BAQ%3D%3D&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256&Signature=39NSgctst5GtoKkCh4yKFPm4t8v0lhLdYpS14hlsi%2FLRbRDz8GFuDLlR6OILVZy%2BdY9RwQKtaF7lZfkF7EyJ5Ip4EELojxNA4dVcn6%2Bl%2B0fRXUHQppoBEACzKH%2BZJVW3OL5cmKEMvPyM5H81oslBvgkSbX3XTr%2FhPLtmLpRzmo2R%2Fp6Igqdc6Lfo0Hj3WmjkiKh%2F3C%2F0w1sRLAI5KdojEXHuoaS10QxBJq2dUwHpMONP4PnD1M5Gq1Jq%2F3PafXC7KBIretam86Lau96anMWWqT60j05eXtPAew66ZFGmeXgRqPcEGat6flcJaDHmVgWjqY7gJHPP6XTBadnng3vIdQ%3D%3D'
+        }, function (err, response){
+          if(err) return done(err);
+          expect(response.statusCode).to.equal(302);
+          const qs = require('querystring');
+          const i = response.headers.location.indexOf('SAMLResponse=');
+          const query = qs.parse(response.headers.location.substr(i));
+          const SAMLResponse = query.SAMLResponse;
+          
+          zlib.inflateRaw(Buffer.from(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
+            if(err) return done(err);
+            signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(decodedAndInflated)[1];
+            const doc = new xmldom.DOMParser().parseFromString(signedAssertion);
+            logoutResultValue = doc.documentElement.getAttribute('Value');
+
+            done();
+          });
+        });
+      });
+
+      it('should respond with a Success value', function () {
+        expect(logoutResultValue).to.equal('urn:oasis:names:tc:SAML:2.0:status:Success');
+      });
+
+      it('should remove session from sessions array', function () {
+        expect(sessions.length).to.equal(0);
+      });
+    });
+
     describe('SP initiated - Invalid signature', function () {
       var response;
 
