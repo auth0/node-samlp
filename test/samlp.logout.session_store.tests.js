@@ -2,7 +2,7 @@ var expect        = require('chai').expect;
 var server        = require('./fixture/server');
 var request       = require('request').defaults({ jar:true  });
 var cheerio       = require('cheerio');
-var xmldom        = require('xmldom');
+var xmldom        = require('@auth0/xmldom');
 var xmlhelper     = require('./xmlhelper');
 var zlib          = require('zlib');
 var utils         = require('../lib/utils');
@@ -44,7 +44,7 @@ var sessionParticipant2 = {
 describe('samlp logout with Session Participants - Session Provider', function () {
   var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
-  
+
   var frozenTime;
   before(() => {
     frozenTime = Date.now();
@@ -54,7 +54,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
   after(() => timekeeper.reset());
 
   before(function (done) {
-    server.start( { 
+    server.start( {
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       issuer: samlIdPIssuer,
       clearIdPSession: function(cb){
@@ -75,7 +75,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
   beforeEach(function (done) {
     request.get({
-      jar: request.jar(), 
+      jar: request.jar(),
       uri: 'http://localhost:5050/samlp?SAMLRequest=fZJbc6owFIX%2FCpN3EAEVMmIHEfDaqlCP%2BtKJELkUEkqCl%2F76Uj3O9JyHPmay9l4r%2BVb%2F6VLkwglXLKXEBG1JBgImIY1SEpvgNXBFHTwN%2BgwVeQmtmidkjT9qzLjQzBEGbxcmqCsCKWIpgwQVmEEeQt9azKEiybCsKKchzYFgMYYr3hjZlLC6wJWPq1Ma4tf13AQJ5yWDrVZO45RIDOWYHWkVYimkBRBGjWVKEL%2BlfEhDSjhlVEJNLvlb1%2FqOA4TJyARvynPH80qFFJPAdg%2Fh1fNnGVqpKO3OLkZonUfJ0Nu2Y2t6PdlVPj1RZxVlThywI8rihVH0MuksTQz3sx1Fm2xv5LO9nYSs5KXxfnm364%2FwfMDPWMqn182qHOqpjzR0dncsM6xO1Vs7h860HI97yrB7xHE9dt2loy%2FQu1prie%2FMcuNNL2i6nUdWp%2Fdnk3yekb7dXYhWjFjil%2Br2IC%2Bd%2FexlNF7wS77Zomvo7epFbCuyVx5tq3klYzWeEMYR4SZQ5LYqypqo6IGiQE2FmiKpencPhOXf%2Fx%2Bm5E71N1iHu4jBcRAsxeWLHwBh82hHIwD3LsCbefWjBL%2BvRQ%2FyYPCAd4MmRvgk4kgqrv8R77d%2B2Azup38LOPgC&RelayState=123'
     }, function (err, response, b){
       if(err) return done(err);
@@ -162,7 +162,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           var query = qs.parse(response.headers.location.substr(i));
           var SAMLResponse = query.SAMLResponse;
           RelayState = query.RelayState;
-          
+
           zlib.inflateRaw(new Buffer(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
             if(err) return done(err);
             signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(decodedAndInflated)[1];
@@ -259,7 +259,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: sessionParticipantLogoutRequestSigAlg,
             Signature: sessionParticipantLogoutRequestSignature
           }
-        }; 
+        };
 
         expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
@@ -275,7 +275,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           // SAMLResponse: base64 encoded + deflated + URLEncoded
           // Signature: URLEncoded
           // SigAlg: URLEncoded
-          // 
+          //
           // <samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
           //   ID="_2bba6ea5e677d807f06a"
           //   InResponseTo="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318"
@@ -356,7 +356,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             }
           };
 
-          expect(utils.validateSignature(params, "LOGOUT_RESPONSE", sessionParticipantLogoutResponse, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;        
+          expect(utils.validateSignature(params, "LOGOUT_RESPONSE", sessionParticipantLogoutResponse, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
         });
 
         it('should remove session from sessions array', function () {
@@ -431,7 +431,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
       it('should return invalid session participant', function(){
         expect(response.statusCode).to.equal(400);
-        expect(response.body).to.equal('Invalid Session Participant');        
+        expect(response.body).to.equal('Invalid Session Participant');
       });
     });
 
@@ -559,7 +559,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: sessionParticipantLogoutRequestSigAlg,
             Signature: sessionParticipantLogoutRequestSignature
           }
-        }; 
+        };
 
         expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
@@ -584,7 +584,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           uri: 'http://localhost:5050/logout'
         }, function (err, response) {
           if(err) return done(err);
-          
+
           expect(response.statusCode).to.equal(302);
 
           var i = response.headers.location.indexOf('?');
@@ -628,7 +628,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: sessionParticipantLogoutRequestSigAlg,
             Signature: sessionParticipantLogoutRequestSignature
           }
-        }; 
+        };
 
         expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipantLogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
       });
@@ -644,7 +644,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           // SAMLResponse: base64 encoded + deflated + URLEncoded
           // Signature: URLEncoded
           // SigAlg: URLEncoded
-          // 
+          //
           // <samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
           //   ID="_2bba6ea5e677d807f06a"
           //   InResponseTo="_73dda80c6c1262377f52"
@@ -662,10 +662,10 @@ describe('samlp logout with Session Participants - Session Provider', function (
             SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
           };
 
-          // We need to sign the reponse here          
+          // We need to sign the reponse here
           var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
           params.Signature = signature;
-          
+
           request.get({
             followRedirect: false,
             uri: 'http://localhost:5050/logout',
@@ -714,7 +714,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
               SigAlg: sessionParticipant2LogoutRequestSigAlg,
               Signature: sessionParticipant2LogoutRequestSignature
             }
-          }; 
+          };
 
           expect(utils.validateSignature(params, "LOGOUT_REQUEST", sessionParticipant2LogoutRequest, { signingCert: server.credentials.cert.toString(), deflate: true })).to.be.undefined;
         });
@@ -794,7 +794,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
           var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-          relayState = $('input[name="RelayState"]').attr('value');        
+          relayState = $('input[name="RelayState"]').attr('value');
           samlResponse = new Buffer(SAMLResponse, 'base64');
           signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(samlResponse)[1];
           var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
@@ -871,7 +871,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         expect(sessionParticipantLogoutRequestRelayState).to.exist;
 
         // TODO: Review as we need to merge validation methods
-        var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutRequest);        
+        var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutRequest);
         expect(utils.validateSignature({body : { SAMLRequest: SAMLRequest }}, "LOGOUT_REQUEST", doc, { signingCert: server.credentials.cert })).to.be.undefined;
       });
 
@@ -903,7 +903,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             if (err) { return done(err); }
             $ = cheerio.load(response.body);
             SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');        
+            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');
             sessionParticipantLogoutResponse = new Buffer(SAMLResponse, 'base64').toString();
             done();
           });
@@ -927,9 +927,9 @@ describe('samlp logout with Session Participants - Session Provider', function (
         it('should validate LogoutResponse signature', function () {
           expect(SAMLResponse).to.exist;
           expect(sessionParticipantLogoutResponseRelayState).to.exist;
-          
-          // TODO: Review as we need to merge validation methods          
-          var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutResponse);                  
+
+          // TODO: Review as we need to merge validation methods
+          var doc = new xmldom.DOMParser().parseFromString(sessionParticipantLogoutResponse);
           expect(utils.validateSignature({body : { SAMLResponse: SAMLResponse }}, "LOGOUT_RESPONSE", doc, { signingCert: server.credentials.cert })).to.be.undefined;
         });
 
@@ -951,7 +951,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         sessions.push({
           serviceProviderId : 'an-issuer',
           nameId: 'foo@example.com',
-          nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',          
+          nameIdFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
           sessionIndex: '1',
           serviceProviderLogoutURL: 'https://example.com/logout',
           cert: sp1_credentials.cert
@@ -977,8 +977,8 @@ describe('samlp logout with Session Participants - Session Provider', function (
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
           var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-          relayState = $('input[name="RelayState"]').attr('value'); 
-          action = $('form').attr('action');                         
+          relayState = $('input[name="RelayState"]').attr('value');
+          action = $('form').attr('action');
           samlResponse = new Buffer(SAMLResponse, 'base64');
           signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(samlResponse)[1];
           var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
@@ -1059,7 +1059,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
             expect(response.statusCode).to.equal(200);
             $ = cheerio.load(response.body);
             SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');        
+            sessionParticipantLogoutResponseRelayState = $('input[name="RelayState"]').attr('value');
             sessionParticipantLogoutResponse = new Buffer(SAMLResponse, 'base64').toString();
             done();
           });
@@ -1125,7 +1125,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           if(err) return done(err);
           expect(response.statusCode).to.equal(200);
           $ = cheerio.load(response.body);
-          // 
+          //
           SAMLRequest = $('input[name="SAMLRequest"]').attr('value');
           sessionParticipantLogoutRequestRelayState = $('input[name="RelayState"]').attr('value');
           sessionParticipantLogoutRequest = new Buffer(SAMLRequest, 'base64').toString();
@@ -1135,7 +1135,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
       describe('should send Session Participant LogoutResponse to the SAML IdP', function () {
         var SAMLResponse, RelayState;
-      
+
         before(function (done) {
           // <samlp:LogoutResponse xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
           //   ID="_2bba6ea5e677d807f06a"
@@ -1301,9 +1301,9 @@ describe('samlp logout with Session Participants - Session Provider', function (
   var sessions = [], returnError;
   var samlIdPIssuer = 'urn:fixture-test';
   var configuredDestination = 'default-destination-url';
-  
+
   before(function (done) {
-    server.start( { 
+    server.start( {
       audience: 'https://auth0-dev-ed.my.salesforce.com',
       issuer: samlIdPIssuer,
       clearIdPSession: function(cb){
@@ -1353,7 +1353,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         $ = cheerio.load(response.body);
         var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
         destination = $('form').attr('action');
-        relayState = $('input[name="RelayState"]').attr('value');        
+        relayState = $('input[name="RelayState"]').attr('value');
         samlResponse = new Buffer(SAMLResponse, 'base64');
         signedAssertion = /(<samlp:StatusCode.*\/>)/.exec(samlResponse)[1];
         var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
