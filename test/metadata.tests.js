@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var server = require('./fixture/server');
 var request = require('request');
-var xmldom = require('xmldom');
+var xmldom = require('@auth0/xmldom');
 
 function certToPem (cert) {
   var pem = /-----BEGIN CERTIFICATE-----([^-]*)-----END CERTIFICATE-----/g.exec(cert.toString());

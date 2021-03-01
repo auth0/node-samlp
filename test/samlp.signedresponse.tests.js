@@ -3,7 +3,7 @@ var server = require('./fixture/server');
 var request = require('request');
 var cheerio = require('cheerio');
 var xmlhelper = require('./xmlhelper');
-var xmldom = require('xmldom');
+var xmldom = require('@auth0/xmldom');
 
 describe('samlp signed response', function () {
   before(function (done) {
