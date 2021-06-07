@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.0.1](https://github.com/auth0/node-samlp/compare/v6.0.0...v6.0.1) (2021-03-02)
+
+- Use @auth0/xmldom ([#119](https://github.com/auth0/node-samlp/commit/e0524290ea7127f72429fd887cb66a8933f0f662))
+
 ## [6.0.0](https://github.com/auth0/node-samlp/compare/v5.0.1...v6.0.0) (2021-02-23)
 
 ### ⚠ BREAKING CHANGES

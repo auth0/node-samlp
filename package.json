@@ -1,6 +1,6 @@
 {
   "name": "samlp",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "querystring": "^0.2.0",
     "saml": "^1.0.0",
     "xml-crypto": "^2.0.0",
-    "xmldom": "auth0/xmldom#v0.1.19-auth0_1",
+    "@auth0/xmldom": "0.1.21",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
