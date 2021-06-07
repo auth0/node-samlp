@@ -770,6 +770,36 @@ describe('samlp logout with Session Participants - Session Provider', function (
         });
       });
     });
+
+    describe('SP initiated - When the SessionParticipant does not have a configured serviceProviderLogoutURL', function () {
+      before(function () {
+        sessions.splice(0);
+        const sessionParticipantWithoutDestination = { ...sessionParticipant1 };
+        delete sessionParticipantWithoutDestination.serviceProviderLogoutURL;
+        sessions.push(sessionParticipantWithoutDestination);
+      });
+
+      // SAMLRequest: base64 encoded + deflated + URLEncoded
+      // Signature: URLEncoded
+      // SigAlg: URLEncoded
+
+      // <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="samlr-220c705e-c15e-11e6-98a4-ecf4bbce4318" IssueInstant="2016-12-13T18:01:12Z" Version="2.0">
+      //   <saml:Issuer>https://foobarsupport.zendesk.com</saml:Issuer>
+      //   <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">foo@example.com</saml:NameID>
+      //   <saml:SessionIndex>1</saml:SessionIndex>
+      // </samlp:LogoutRequest>
+      it('should respond with an error', function (done) {
+        request.get({
+          followRedirect: false,
+          uri: 'http://localhost:5050/logout?SAMLRequest=fVFNS8NAEL0L%2Foew900zaa1xaIOFIgSqBysevG03Uw1md%2BPOBoq%2F3m1aoVZ0DnOY97WPnbEybYcr9%2Br68EgfPXFIdqa1jAMyF7236BQ3jFYZYgwa14v7FeZphp13wWnXihPJ%2FwrFTD40zoqkWs7FXuBlnmf6OrsiqSEuAJrKm0JNJOntZLPRNBlDEfnMPVWWg7JhLvIMphJyCeMnKDADhPxFJM%2FkOZpHOM1EeXmRHGe2D8LBwZdvIXSMo9HWuY3y3Hed8yH9JFsTv6famdnolH7u8hBLVcvkznmjwt9tIYXh0tRyO1CRjGraRV17YhZlTL%2BlnTJdSyeZB%2FNfmesoib2q%2BMRdCUfuj%2BO34oCd%2FWj5BQ%3D%3D&Signature=NkobB0DS0M4kfV89R%2Bma0wp0djNr4GW2ziVemwSvVYy2iF432qjs%2FC4Y1cZDXwuF5OxMgu4DuelS5mW3Z%2B46XXkoMVBizbd%2BIuJUFQcvLtiXHkoaEk8HVU0v5bA9TDoc9Ve7A0nUgKPciH7KTcFSr45vepyg0dMMQtarsUZeYSRPM0QlwxXKCWRQJDwGHLie5dMCZTRNUEcm9PtWZij714j11HI15u6Fp5GDnhp7mzKuAUdSIKHzNKAS2J4S8xZz9n9UTCl3uBbgfxZ3av6%2FMQf7HThxTl%2FIOmU%2FYCAN6DWWE%2BQ3Z11bgU06P39ZuLW2fRBOfIOO6iTEaAdORrdBOw%3D%3D&RelayState=123&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
+        }, (err, response) => {
+          if (err) return done(err);
+          expect(response.statusCode).to.equal(400);
+          expect(response.body).to.equal('The logout URL may be missing or misconfigured');
+          done();
+        });
+      });
+    });
   });
 
   describe('HTTP POST', function () {
