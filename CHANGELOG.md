@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.0.1](https://github.com/auth0/node-samlp/compare/v7.0.0...v7.0.1) (2022-05-19)
+
+
+### Bug Fixes
+
+* install updated saml to address issue with malformed pem ([#129](https://github.com/auth0/node-samlp/issues/129)) ([ce5cb5c](https://github.com/auth0/node-samlp/commit/ce5cb5ceaa627596ae114ab81a50464da982ffd4))
+
 ## [7.0.0](https://github.com/auth0/node-samlp/compare/v6.0.2...v7.0.0) (2022-02-09)
 
 
