@@ -6,6 +6,10 @@ SAML Protocol middleware to create SAMLP identity providers for node.js.
 
     npm install samlp
 
+### Supported Node Versions
+
+node >= 12
+
 ## Introduction
 
 This middleware is meant to generate a valid SAML Protocol identity provider endpoint that speaks saml.
