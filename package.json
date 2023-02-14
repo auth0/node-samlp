@@ -1,6 +1,6 @@
 {
-  "name": "samlp",
-  "version": "7.0.1",
+  "name": "@techteamer/samlp",
+  "version": "7.1.0",
   "engines": {
     "node": ">=12"
   },
@@ -28,7 +28,7 @@
     "ejs": "^3.1.8",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
-    "saml": "TechTeamer/node-saml",
+    "@techteamer/saml": "^3.1.0",
     "xml-crypto": "^2.0.0",
     "@auth0/xmldom": "0.1.21",
     "xpath": "0.0.5",
