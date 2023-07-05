@@ -1521,7 +1521,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
       });
     });
 
-    describe('SP initiated - 1 Session Participant with GET binding', function () {
+    describe('SP initiated - 1 Session Participant with Redirect binding', function () {
       var logoutResponse;
 
       before(function () {
@@ -1536,12 +1536,12 @@ describe('samlp logout with Session Participants - Session Provider', function (
         });
       });
 
-      it('Should return POST request', function () {
+      it('Should return Redirect request', function () {
         assertRedirectResponse(logoutResponse);
       });
     });
 
-    describe('SP initiated - 2 Session Participants with GET binding', function() {
+    describe('SP initiated - 2 Session Participants with Redirect binding', function() {
       var logoutResponse;
 
       before(function () {
@@ -1556,7 +1556,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
         });
       });
 
-      it('Should return POST request', function () {
+      it('Should return Redirect request', function () {
         assertRedirectResponse(logoutResponse);
       });
     });
