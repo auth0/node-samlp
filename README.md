@@ -114,7 +114,7 @@ var sessionParticipant = {
 };
 ```
 
-In some situations it is possible for session participants to have mixed bindings during one Single Log Out (SLO) transaction. By default the library will use the binding of the participant which initiated the logout, however if mixed bindings must be used - each participant must have the binding specified as an additional field. If the binding value is invalid - it will fall back to `HTTP-Redirect`.
+In some situations it is possible for session participants to have mixed bindings during one Single Log Out (SLO) transaction. By default the library will use the binding specified in `options.protocolBinding`, however if mixed bindings must be used - each participant must have the binding specified as an additional field. If the binding value is invalid - it will fall back to `HTTP-POST`.
 
 Add the middleware as follows:
 
