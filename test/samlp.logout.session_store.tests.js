@@ -6,7 +6,6 @@ var xmldom        = require('@auth0/xmldom');
 var xmlhelper     = require('./xmlhelper');
 var zlib          = require('zlib');
 var utils         = require('../lib/utils');
-var qs            = require('querystring');
 var signers       = require('../lib/signers');
 var fs            = require('fs');
 var path          = require('path');
@@ -243,9 +242,8 @@ describe('samlp logout with Session Participants - Session Provider', function (
         }, function (err, response){
           if(err) return done(err);
           expect(response.statusCode).to.equal(302);
-          var qs = require('querystring');
           var i = response.headers.location.indexOf('SAMLResponse=');
-          var query = qs.parse(response.headers.location.substr(i));
+          var query = new URLSearchParams(response.headers.location.substr(i));
           var SAMLResponse = query.SAMLResponse;
           RelayState = query.RelayState;
 
@@ -306,7 +304,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
           var i = response.headers.location.indexOf('?');
           var completeQueryString = response.headers.location.substr(i+1);
-          var parsedQueryString = qs.parse(completeQueryString);
+          var parsedQueryString = new URLSearchParams(completeQueryString);
 
           SAMLRequest = parsedQueryString.SAMLRequest;
           sessionParticipantLogoutRequestRelayState = parsedQueryString.RelayState;
@@ -380,7 +378,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           };
 
           // We need to sign the reponse here
-          var signature = signers.sign({key: sp2_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
+          var signature = signers.sign({key: sp2_credentials.key, signatureAlgorithm: 'rsa-sha1' }, (new URLSearchParams(params)).toString());
           params.Signature = signature;
 
           request.get({
@@ -390,11 +388,10 @@ describe('samlp logout with Session Participants - Session Provider', function (
           }, function (err, response) {
             if (err) { return done(err); }
             expect(response.statusCode).to.equal(302);
-            var qs = require('querystring');
 
             var i = response.headers.location.indexOf('?');
             var completeQueryString = response.headers.location.substr(i+1);
-            var parsedQueryString = qs.parse(completeQueryString);
+            var parsedQueryString = new URLSearchParams(completeQueryString);
 
             SAMLResponse = parsedQueryString.SAMLResponse;
             sessionParticipantLogoutResponseRelayState = parsedQueryString.RelayState;
@@ -476,9 +473,8 @@ describe('samlp logout with Session Participants - Session Provider', function (
         }, function (err, response){
           if(err) return done(err);
           expect(response.statusCode).to.equal(302);
-          const qs = require('querystring');
           const i = response.headers.location.indexOf('SAMLResponse=');
-          const query = qs.parse(response.headers.location.substr(i));
+          const query = new URLSearchParams(response.headers.location.substr(i));
           const SAMLResponse = query.SAMLResponse;
 
           zlib.inflateRaw(Buffer.from(SAMLResponse, 'base64'), function (err, decodedAndInflated) {
@@ -656,7 +652,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
           var i = response.headers.location.indexOf('?');
           var completeQueryString = response.headers.location.substr(i+1);
-          var parsedQueryString = qs.parse(completeQueryString);
+          var parsedQueryString = new URLSearchParams(completeQueryString);
 
           SAMLRequest = parsedQueryString.SAMLRequest;
           sessionParticipantLogoutRequestSigAlg = parsedQueryString.SigAlg;
@@ -725,7 +721,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
           var i = response.headers.location.indexOf('?');
           var completeQueryString = response.headers.location.substr(i+1);
-          var parsedQueryString = qs.parse(completeQueryString);
+          var parsedQueryString = new URLSearchParams(completeQueryString);
 
           SAMLRequest = parsedQueryString.SAMLRequest;
           sessionParticipantLogoutRequestRelayState = parsedQueryString.RelayState;
@@ -799,7 +795,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
           };
 
           // We need to sign the reponse here
-          var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, qs.stringify(params));
+          var signature = signers.sign({key: sp1_credentials.key, signatureAlgorithm: 'rsa-sha1' }, (new URLSearchParams(params)).toString());
           params.Signature = signature;
 
           request.get({
@@ -812,7 +808,7 @@ describe('samlp logout with Session Participants - Session Provider', function (
 
             var i = response.headers.location.indexOf('?');
             var completeQueryString = response.headers.location.substr(i+1);
-            var parsedQueryString = qs.parse(completeQueryString);
+            var parsedQueryString = new URLSearchParams(completeQueryString);
 
             SAMLRequest2 = parsedQueryString.SAMLRequest;
             sessionParticipant2LogoutRequestRelayState = parsedQueryString.RelayState;
