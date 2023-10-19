@@ -625,7 +625,7 @@ describe('samlp logout with Session Participants - Custom Provider', function ()
 
             var i = response.headers.location.indexOf('?');
             var completeQueryString = response.headers.location.substr(i+1);
-            var parsedQueryString = Object.fromEntries(new URLSearchParams(completeQueryString))
+            var parsedQueryString = Object.fromEntries(new URLSearchParams(completeQueryString));
 
             SAMLRequest2 = parsedQueryString.SAMLRequest;
             sessionParticipant2LogoutRequestRelayState = parsedQueryString.RelayState;
