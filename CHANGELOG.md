@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* support signed logout resposne sent via POST ([#140](https://github.com/auth0/node-samlp/issues/140)) ([5274d62](https://github.com/auth0/node-samlp/commit/5274d622b1f4cca04790dcf2acf83840c0b592c6))
+* support signed logout response sent via POST ([#140](https://github.com/auth0/node-samlp/issues/140)) ([5274d62](https://github.com/auth0/node-samlp/commit/5274d622b1f4cca04790dcf2acf83840c0b592c6))
 
 ## [7.1.0](https://github.com/auth0/node-samlp/compare/v7.0.2...v7.1.0) (2023-07-24)
 
