@@ -38,8 +38,9 @@ Options
 | signResponse        | whether to sign the SAML response                | false                                        |
 | signAssertion       | whether to sign the SAML assertion               | true                                         |
 | RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
-| sessionIndex          | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
-| responseHandler       | custom response handler for SAML response f(SAMLResponse, options, req, res, next) | HTML response that POSTS to postUrl |
+| sessionIndex        | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
+| responseHandler     | custom response handler for SAML response f(SAMLResponse, options, req, res, next) | HTML response that POSTS to postUrl |
+| signResponse        | sign the response instead of the assertion       | false |
 
 
 Add the middleware as follows:
