@@ -26,7 +26,7 @@
     "@auth0/thumbprint": "0.0.6",
     "auth0-id-generator": "^0.2.0",
     "ejs": "^3.1.8",
-    "flowstate": "^0.4.0",
+    "flowstate": "^0.6.0",
     "querystring": "^0.2.0",
     "saml": "^3.0.1",
     "xml-crypto": "^2.0.0",
