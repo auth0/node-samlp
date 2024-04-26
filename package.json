@@ -30,7 +30,7 @@
     "querystring": "^0.2.0",
     "saml": "^3.0.1",
     "xml-crypto": "^2.0.0",
-    "@auth0/xmldom": "0.1.21",
+    "@auth0/xmldom": "0.1.23",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
