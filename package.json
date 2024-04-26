@@ -31,7 +31,7 @@
     "saml": "^3.0.1",
     "xml-crypto": "^2.0.0",
     "@auth0/xmldom": "0.1.21",
-    "xpath": "0.0.5",
+    "xpath": "0.0.34",
     "xtend": "^1.0.3"
   },
   "devDependencies": {
