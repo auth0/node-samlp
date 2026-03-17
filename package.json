@@ -6,11 +6,15 @@
   },
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
+  "files": [
+    "lib",
+    "templates"
+  ],
   "scripts": {
     "test": "./node_modules/.bin/_mocha -R spec --colors",
     "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec --colors",
     "open_cover": "open coverage/lcov-report/*.html",
-    "release": "standard-version"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -44,7 +48,11 @@
     "istanbul": "^0.4.5",
     "mocha": "~8.2.1",
     "request": "~2.88.0",
-    "standard-version": "^9.1.0",
+    "semantic-release": "^25.0.2",
+    "@semantic-release/exec": "^7.0.3",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "husky": "^9.1.7",
     "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
   }
