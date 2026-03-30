@@ -53,6 +53,7 @@
     "mocha": "~8.2.1",
     "request": "~2.88.0",
     "semantic-release": "^25.0.2",
+    "conventional-changelog-conventionalcommits": "^9.3.0",
     "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
   }
