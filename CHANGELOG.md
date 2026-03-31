@@ -1,3 +1,14 @@
+# [8.0.0](https://github.com/auth0/node-samlp/compare/v7.1.1...v8.0.0) (2026-03-31)
+
+
+### Features
+
+* add encryption algorithm options ([#157](https://github.com/auth0/node-samlp/issues/157)) ([1444aad](https://github.com/auth0/node-samlp/commit/1444aad42039578d0a659576141318c91e8e5afe))
+
+
+### BREAKING CHANGES
+
+* adding encryption algorithm in options(if not set, defaults to http://www.w3.org/2009/xmlenc11#aes256-gcm), adding disallowEncryptionWithInsecureAlgorithm to enforce secure encryption algorithms
 ### [7.1.1](https://github.com/auth0/node-samlp/compare/v7.1.0...v7.1.1) (2023-11-20)
 
 
