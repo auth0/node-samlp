@@ -40,7 +40,11 @@ Options
 | RelayState          | state of the auth process                        | ```req.query.RelayState || req.body.RelayState``` |
 | sessionIndex          | the index of a particular session between the principal identified by the subject and the authenticating authority                        | _SessionIndex is not included_ |
 | responseHandler       | custom response handler for SAML response f(SAMLResponse, options, req, res, next) | HTML response that POSTS to postUrl |
-
+| encryptionPublicKey | Public key used to encrypt the SAML assertion |
+| encryptionCert | Certificate used to encrypt SAML assertion |
+| encryptionAlgorithm | The encryption algorithm to encrypt saml assertion | http://www.w3.org/2009/xmlenc11#aes256-gcm ([node-xml-encryption](https://github.com/auth0/node-xml-encryption/blob/master/README.md) details the available encryption algorithms and configuration options.) |
+| disallowEncryptionWithInsecureAlgorithm | If true, disallows encryption with algorithms considered insecure by [node-xml-encryption](https://github.com/auth0/node-xml-encryption/blob/master/README.md) | true |
+| warnOnInsecureEncryptionAlgorithm | If true, logs a warning when using an insecure encryption algorithm (using disallowEncryptionWithInsecureAlgorithm as false) | true |
 
 Add the middleware as follows:
 

@@ -8,6 +8,7 @@ var zlib = require('zlib');
 var encoder = require('../lib/encoders');
 var fs = require('fs');
 var path = require('path');
+var getSamlResponse = require('../lib/samlp').getSamlResponse;
 
 describe('samlp', function () {
 
@@ -859,6 +860,96 @@ describe('samlp', function () {
         var doc = new xmldom.DOMParser().parseFromString(signedAssertion);
         var signature = doc.documentElement.getElementsByTagName('Signature');
         expect(signature[0].parentNode.nodeName).to.equal('saml:Assertion');
+      });
+    });
+  });
+
+  describe('when using encryption options', function () {
+    
+    describe('when using insecure algorithm', function () {
+      var body, $, response;                                                                                                        
+                                                                                                                      
+      before(function (done) {
+        server.options = {
+          encryptionPublicKey: fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionCert:      fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionAlgorithm: 'http://www.w3.org/2001/04/xmlenc#aes256-cbc',
+          disallowEncryptionWithInsecureAlgorithm: true,
+          warnOnInsecureEncryptionAlgorithm: false
+        };
+        request.get({
+          jar: request.jar(),
+          uri: 'http://localhost:5050/samlp?SAMLRequest=' + urlEncodedSAMLRequest + '&RelayState=123'
+        }, function (err, res, b) {
+          if (err) return done(err);
+          body = b;
+          response = res;
+          $ = cheerio.load(body);
+          done();
+        });
+      });
+
+      it('should return an error with disallowEncryptionWithInsecureAlgorithm set to true', function () {
+        expect(response.statusCode).to.equal(400);
+        expect(body).to.equal('encryption algorithm http://www.w3.org/2001/04/xmlenc#aes256-cbc is not secure');
+      });
+    });
+
+    describe('when using insecure encryption algorithm with disallowEncryptionWithInsecureAlgorithm set to false', function () {
+      var body, $, response;                                                                                                        
+                                                                                                                      
+      before(function (done) {
+        server.options = {
+          encryptionPublicKey: fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionCert:      fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionAlgorithm: 'http://www.w3.org/2001/04/xmlenc#aes256-cbc',
+          disallowEncryptionWithInsecureAlgorithm: false,
+          warnOnInsecureEncryptionAlgorithm: false
+        };
+        request.get({
+          jar: request.jar(),
+          uri: 'http://localhost:5050/samlp?SAMLRequest=' + urlEncodedSAMLRequest + '&RelayState=123'
+        }, function (err, res, b) {
+          if (err) return done(err);
+          body = b;
+          response = res;
+          $ = cheerio.load(body);
+          done();
+        });
+      });
+
+      it('should return success with disallowEncryptionWithInsecureAlgorithm set to false', function (done) {
+        expect(response.statusCode).to.equal(200);
+        done();
+      });
+    });
+
+    describe('when using secure encryption algorithm', function () {
+      var body, $, response;                                                                                                        
+                                                                                                                      
+      before(function (done) {
+        server.options = {
+          encryptionPublicKey: fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionCert:      fs.readFileSync(path.join(__dirname, 'fixture/sp1.pem')),
+          encryptionAlgorithm: 'http://www.w3.org/2009/xmlenc11#aes256-gcm',
+          disallowEncryptionWithInsecureAlgorithm: true,
+          warnOnInsecureEncryptionAlgorithm: false
+        };
+        request.get({
+          jar: request.jar(),
+          uri: 'http://localhost:5050/samlp?SAMLRequest=' + urlEncodedSAMLRequest + '&RelayState=123'
+        }, function (err, res, b) {
+          if (err) return done(err);
+          body = b;
+          response = res;
+          $ = cheerio.load(body);
+          done();
+        });
+      });
+
+      it('should return success when using a secure algorithm', function (done) {
+        expect(response.statusCode).to.equal(200);
+        done();
       });
     });
   });
