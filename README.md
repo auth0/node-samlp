@@ -8,7 +8,7 @@ SAML Protocol middleware to create SAMLP identity providers for node.js.
 
 ### Supported Node Versions
 
-node >= 12
+node >= 22
 
 ## Introduction
 
@@ -153,6 +153,18 @@ samlp.sendError({
     }
 })(req, res, next);
 ~~~~
+
+## Testing
+
+Tests require Node.js >= 22 and are run with Mocha:
+
+    npm test
+
+The test suite starts a real Express server (`test/fixture/server.js`) on `http://localhost:5050` before each test file runs and tears it down afterward. The server mounts the actual `samlp` middleware against a hardcoded fake user and fixture certificate/key pair (`test/fixture/samlp.test-cert.{pem,key}`). Tests make real HTTP requests to this server using the `request` library and assert against the responses.
+
+Individual test suites reconfigure the server between tests by directly mutating `server.options`, which is merged into the middleware options on each request — allowing cert, key, signing, and session-participant settings to be swapped without restarting the server.
+
+Test certificates and keys in `test/fixture/` are for local testing only and must not be used in production.
 
 ## Issue Reporting
 

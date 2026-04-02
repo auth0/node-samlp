@@ -5,6 +5,8 @@ var cheerio = require('cheerio');
 var xmldom = require('@auth0/xmldom');
 var xmlhelper = require('./xmlhelper');
 var zlib = require('zlib');
+var crypto = require('crypto');
+var querystring = require('querystring');
 var encoder = require('../lib/encoders');
 var fs = require('fs');
 var path = require('path');
@@ -604,18 +606,26 @@ describe('samlp', function () {
 
         before(function (done) {
           var SAMLRequest = '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" AssertionConsumerServiceURL="https://acs" Destination="https://destination" ID="12345" IssueInstant="2013-04-28T22:43:42.386Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://sp</saml:Issuer></samlp:AuthnRequest>';
+          var signingKey = fs.readFileSync(path.join(__dirname, 'fixture/samlp.test-cert.key'));
+          var sigAlg = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1';
 
-          zlib.deflateRaw(new Buffer(SAMLRequest), function (err, buffer) {
+          zlib.deflateRaw(Buffer.from(SAMLRequest), function (err, buffer) {
             if (err) return done(err);
+
+            var b64SAMLRequest = buffer.toString('base64');
+            var content = querystring.stringify({ SAMLRequest: b64SAMLRequest, RelayState: '123', SigAlg: sigAlg });
+            var signer = crypto.createSign('RSA-SHA1');
+            signer.update(content);
+            var signature = signer.sign(signingKey, 'base64');
 
             request.get({
               jar: request.jar(),
               uri: 'http://localhost:5050/samlp',
               qs: {
                 RelayState: '123',
-                SAMLRequest: buffer.toString('base64'),
-                Signature: 'HaX739zOyRn4PR2pi1Bud05rHbPGfppz5x5crr2EuOzLbfNuvLeK//ZCNsC/R/8B4CWe2SYYCYJ6UhBRvhCx8G7H92TIw8TjbsTfAWemp6mJh+zBqaI2It8sFZMYntsbd0jfBo4CbuM8872cNQkdedV5V56gaErjBA8z3HoyTWpQi9nH2fjtmDDfoQmoVum5q+vgbm103qxjH0j/gR+OXi5Rne8ijMLhhXgt9EdLmN8OS6l1LRUPe3XDLz6ZKbo9T2k6GR1x+w6bN18JOdeCwDn+nx4fmPbGGrcz/DT/3mTL5MY7TeRDz8rGSCZ5+yDNtmgQ9Nv2O//joonmRBkF6Q==',
-                SigAlg: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+                SAMLRequest: b64SAMLRequest,
+                Signature: signature,
+                SigAlg: sigAlg
               }
             }, function (err, response, b){
                 if(err) return done(err);
@@ -626,7 +636,7 @@ describe('samlp', function () {
                 body = b;
                 $ = cheerio.load(body);
                 var SAMLResponse = $('input[name="SAMLResponse"]').attr('value');
-                samlResponse = new Buffer(SAMLResponse, 'base64').toString();
+                samlResponse = Buffer.from(SAMLResponse, 'base64').toString();
                 signedAssertion = /(<saml:Assertion.*<\/saml:Assertion>)/.exec(samlResponse)[1];
                 done();
             });
@@ -687,7 +697,7 @@ describe('samlp', function () {
         it('should return an error', function (done) {
           doRawSAMLRequest(function (response) {
             expect(response.statusCode).to.equal(400);
-            expect(response.body).to.match(/error:\w+:PEM routines:\w+:no start line/);
+            expect(response.body).to.match(/(PEM routines|DECODER routines)/);
             done();
           });
         });
@@ -736,7 +746,7 @@ describe('samlp', function () {
         it('should return an error', function (done) {
           doRawSAMLRequest(function (response) {
             expect(response.statusCode).to.equal(400);
-            expect(response.body).to.match(/error:\w+:PEM routines:\w+:no start line/);
+            expect(response.body).to.match(/(PEM routines|DECODER routines)/);
             done();
           });
         });
