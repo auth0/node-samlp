@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/DataRecognitionCorporation/node-samlp/compare/v7.1.1...v7.2.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* Requires Node.js >= 22
+
+
+### Bug Fixes
+
+* fix metadata endpoint ignoring `X-Forwarded-Host` header for endpoint URLs
+* fix test compatibility with Node.js 22 / OpenSSL 3 (dynamic redirect signature, updated error regex)
+
+
+### Dependency Updates
+
+* saml upgraded to ^4.0.0
+* @auth0/xmldom updated to 0.1.23
+* ejs updated to ^3.1.10
+* mocha pinned to 11.3.0
+
+
 ### [7.1.1](https://github.com/auth0/node-samlp/compare/v7.1.0...v7.1.1) (2023-11-20)
 
 
