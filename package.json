@@ -1,8 +1,8 @@
 {
   "name": "samlp",
-  "version": "7.1.1",
+  "version": "7.2.0",
   "engines": {
-    "node": ">=12"
+    "node": ">=22"
   },
   "description": "SAML Protocol server middleware",
   "main": "lib/index.js",
@@ -25,12 +25,12 @@
   "dependencies": {
     "@auth0/thumbprint": "0.0.6",
     "auth0-id-generator": "^0.2.0",
-    "ejs": "^3.1.8",
+    "ejs": "^3.1.10",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
-    "saml": "^3.0.1",
+    "saml": "^4.0.0",
     "xml-crypto": "^2.0.0",
-    "@auth0/xmldom": "0.1.21",
+    "@auth0/xmldom": "0.1.23",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
@@ -42,10 +42,16 @@
     "express": "^4.17.1",
     "express-session": "^1.14.2",
     "istanbul": "^0.4.5",
-    "mocha": "~8.2.1",
+    "mocha": "11.3.0",
     "request": "~2.88.0",
     "standard-version": "^9.1.0",
     "timekeeper": "^2.2.0",
     "uid2": "0.0.3"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "^0.8.12",
+    "underscore": "^1.13.8",
+    "serialize-javascript": "^7.0.3",
+    "nth-check": "^2.0.1"
   }
 }
