@@ -30,11 +30,11 @@
     "@auth0/thumbprint": "0.0.6",
     "@auth0/xmldom": "0.1.21",
     "auth0-id-generator": "^0.2.0",
-    "ejs": "^3.1.8",
+    "ejs": "^3.1.10",
     "flowstate": "^0.4.0",
     "querystring": "^0.2.0",
     "saml": "^4.0.0",
-    "xml-crypto": "^2.0.0",
+    "xml-crypto": "^2.1.6",
     "xpath": "0.0.5",
     "xtend": "^1.0.3"
   },
