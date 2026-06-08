@@ -1,5 +1,20 @@
 SAML Protocol middleware to create SAMLP identity providers for node.js.
 
+
+# ⚠️ This repository is being archived
+
+**`node-samlp` is no longer actively maintained and will be archived (made read-only) on 1 July 2026.**
+
+ For details and to ask questions, see the [pinned announcement issue](https://github.com/auth0/node-samlp/issues/161).
+
+### Key dates
+
+| Date | What happens |
+| --- | --- |
+| **5 June 2026** | Archival announement |
+| **1 July 2026** | Repository archived; Issues and PRs disabled. |
+| **1 January 2027** | `samlp` [npm package](https://www.npmjs.com/package/samlp) marked as deprecated. |
+
 ![Build Status](https://github.com/auth0/node-samlp/workflows/Tests/badge.svg)
 
 ## Installation
